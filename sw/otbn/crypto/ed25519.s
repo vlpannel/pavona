@@ -1,3 +1,7 @@
+/* Copyright zeroRISC Inc. */
+/* Licensed under the Apache License, Version 2.0, see LICENSE for details. */
+/* SPDX-License-Identifier: Apache-2.0 */
+
 /* Copyright lowRISC contributors (OpenTitan project). */
 /* Licensed under the Apache License, Version 2.0, see LICENSE for details. */
 /* SPDX-License-Identifier: Apache-2.0 */
@@ -65,11 +69,6 @@
 */
 
 /**
- * Constants for accessing flags.
- */
-.equ CSR_FG0,          0x7c0
-
-/**
  * Top-level Ed25519 signature verification operation.
  *
  * Returns SUCCESS or FAILURE.
@@ -99,10 +98,10 @@
  * @param[in]  dmem[ed25519_hash_k]: precomputed hash k, 512 bits
  * @param[in]  dmem[ed25519_sig_R]: encoded signature point R_, 256 bits
  * @param[in]  dmem[ed25519_sig_S]: signature scalar S, 256 bits
- * @param[in]  dmem[ed25519_public_key]: encoded public key A_, 512 bits
+ * @param[in]  dmem[ed25519_public_key]: encoded public key A_, 256 bits
  * @param[out] dmem[ed25519_verify_result]: SUCCESS or FAILURE
  *
- * clobbered registers: x2 to x4, x20 to x23, w2 to w30
+ * clobbered registers: x2 to x4, x20 to x23, w1 to w30
  * clobbered flag groups: FG0
  */
 .globl ed25519_verify_var
@@ -121,33 +120,22 @@ ed25519_verify_var:
   bn.lid   x2, 0(x3)
 
   /* Reduce k modulo L.
-       w18 <= [w17:w16] mod L = k mod L */
+       w3 <= [w17:w16] mod L = k mod L */
   jal      x1, sc_reduce
+  bn.mov   w3, w18
 
-  /* Compute (8 * k) mod L.
-       w3 <= (2 * (2 * (2 * w18) mod L) mod L) mod L = (8 * k) mod L */
-  bn.addm  w3, w18, w18
-  bn.addm  w3, w3, w3
-  bn.addm  w3, w3, w3
-
-  /* Load the 512-bit signature (R_ || S).
-       w11 <= R_
-       w29 <= S */
-  li       x2, 11
-  la       x3, ed25519_sig_R
-  bn.lid   x2, 0(x3)
-  li       x2, 29
+  /* Load the scalar S (second half of the signature).
+      w1 <= dmem[ed25519_sig_S] = S*/
+  li       x2, 1
   la       x3, ed25519_sig_S
   bn.lid   x2, 0(x3)
 
-  /* Check that S is in range (0 <= S < L). */
-
   /* w27 <= MOD = L */
-  bn.wsrr  w27, 0x0
-  /* FG0.C <= (w29 - w27) <? 0 = S <? L */
-  bn.cmp   w29, w27
+  bn.wsrr  w27, MOD
+  /* FG0.C <= (w1 - w27) <? 0 = S <? L */
+  bn.cmp   w1, w27
   /* x2 <= FG0[0] = FG0.C */
-  csrrs    x2, CSR_FG0, x0
+  csrrs    x2, FG0, x0
   andi     x2, x2, 1
 
   /* Fail if S >= L. */
@@ -155,22 +143,29 @@ ed25519_verify_var:
   bne      x2, x3, verify_fail
 
   /* Compute (8 * S) mod L.
-       w29 <= (2 * (2 * (2 * w29) mod L) mod L) mod L = (8 * S) mod L */
-  bn.addm  w29, w29, w29
-  bn.addm  w29, w29, w29
-  bn.addm  w29, w29, w29
+       w1 <= (2 * (2 * (2 * w1) mod L) mod L) mod L = (8 * S) mod L */
+  bn.addm  w1, w1, w1
+  bn.addm  w1, w1, w1
+  bn.addm  w1, w1, w1
 
   /* Set up for field arithmetic in preparation for scalar multiplication and
      point addition.
        MOD <= p
-       w19 <= 19 */
+       w19 <= 19
+       w30 <= 38 */
   jal      x1, fe_init
 
   /* Initialize curve parameter d.
-       w30 <= dmem[d] = (-121665/121666) mod p */
-  li      x2, 30
+       w29 <= dmem[d] = (-121665/121666) mod p */
+  li      x2, 29
   la      x3, ed25519_d
   bn.lid  x2, 0(x3)
+
+  /* Load the encoded point R_ (first half of the signature).
+       w11 <= R_ */
+  li       x2, 11
+  la       x3, ed25519_sig_R
+  bn.lid   x2, 0(x3)
 
   /* Decode the signature point R.
        x20 <= SUCCESS or FAILURE
@@ -200,21 +195,15 @@ ed25519_verify_var:
   /* If A was not a valid point (x20 != SUCCESS), fail. */
   bne      x20, x21, verify_fail
 
-  /* Precompute (2*d) mod p in preparation for scalar multiplication.
-       w30 <= (w30 + w30) mod p = (2 * d) mod p */
-  bn.addm  w30, w30, w30
-
   /* Convert A to extended coordinates.
       [w9:w6] <= extended(A) = (A.X, A.Y, A.Z, A.T) */
   bn.mov   w6, w10
   bn.mov   w7, w11
   jal      x1, affine_to_ext
 
-  /* w28 <= w3 = (8 * k) mod L */
+  /* [w13:w10] <= w3 * [w9:w6] = [k]A */
   bn.mov   w28, w3
-
-  /* [w13:w10] <= w28 * [w9:w6] = [8][k]A */
-  jal      x1, ext_scmul
+  jal      x1, ext_scmul_var
 
   /* Convert R to extended coordinates.
        [w9:w6] <= extended(R) = (R.X, R.Y, R.Z, R.T) */
@@ -222,34 +211,21 @@ ed25519_verify_var:
   bn.mov   w7, w5
   jal      x1, affine_to_ext
 
-  /* Store the intermediate result [8][k]A for later.
-       [w5:w2] <= [w13:w10] = [8][k]A */
-  bn.mov   w2, w10
-  bn.mov   w3, w11
-  bn.mov   w4, w12
-  bn.mov   w5, w13
-
-  /* Compute [8]R with three doublings. */
-
-  /* [w13:w10] <= [w9:w6] = R */
-  bn.mov   w10, w6
-  bn.mov   w11, w7
-  bn.mov   w12, w8
-  bn.mov   w13, w9
-  /* [w13:w10] <= [w13:w10] + [w13:w10] = [2]R */
-  jal      x1, ext_double
-  /* [w13:w10] <= [w13:w10] + [w13:w10] = [4]R */
-  jal      x1, ext_double
-  /* [w13:w10] <= [w13:w10] + [w13:w10] = [8]R */
-  jal      x1, ext_double
-
-  /* Compute the right-hand side of the curve equation.
-       [w13:w10] <= [w13:w10] + [w5:w2] = [8]R + [8][k]A */
-  bn.mov   w14, w2
-  bn.mov   w15, w3
-  bn.mov   w16, w4
-  bn.mov   w17, w5
+  /* [w13:w10] <= [w13:w10] + [w9:w6] =  [k]A + R */
+  bn.mov   w14, w6
+  bn.mov   w15, w7
+  bn.mov   w16, w8
+  bn.mov   w17, w9
   jal      x1, ext_add
+
+  /* Compute the right-hand side of the curve equation with three doublings.
+       [w13:w10] <= ([k]A + R) * 2^3 = [8]R + [8][k]A */
+  /* [w13:w10] <= [w13:w10] + [w13:w10] = [2]([k]A + R) */
+  jal      x1, ext_double
+  /* [w13:w10] <= [w13:w10] + [w13:w10] = [4]([k]A + R) */
+  jal      x1, ext_double
+  /* [w13:w10] <= [w13:w10] + [w13:w10] = [8]([k]A + R)*/
+  jal      x1, ext_double
 
   /* Store the right-hand side for later.
        [w5:w2] <= [w13:w10] = [8]R + [8][k]A */
@@ -271,12 +247,10 @@ ed25519_verify_var:
        [w9:w6] <= extended(B) = (B.X, B.Y, B.Z, B.T) */
   jal      x1, affine_to_ext
 
-  /* w28 <= w29 = (8 * S) mod L */
-  bn.mov   w28, w29
-
   /* Compute the left-hand side of the curve equation.
-       [w13:w10] <= w28 * [w9:w6] = [8][S]B */
-  jal      x1, ext_scmul
+       [w13:w10] <= w1 * [w9:w6] = [8][S]B */
+  bn.mov   w28, w1
+  jal      x1, ext_scmul_var
 
   /* Compare both sides of the equation for equality.
        dmem[ed25519_verify_result] <= SUCCESS if [w5:w2] == [w13:w10],
@@ -294,7 +268,7 @@ ed25519_verify_var:
   ret
 
 /**
- * Top-level Ed25519 signature generation operation (first stage).
+ * Top-level Ed25519 signature generation operation.
  *
  * Returns R_ (encoded signature point) and A_ (encoded public key point).
  *
@@ -389,14 +363,10 @@ ed25519_sign_stage1:
   jal      x1, fe_init
 
   /* Initialize curve parameter d.
-       w30 <= dmem[d] = (-121665/121666) mod p */
-  li      x2, 30
+       w29 <= dmem[d] = (-121665/121666) mod p */
+  li      x2, 29
   la      x3, ed25519_d
   bn.lid  x2, 0(x3)
-
-  /* Precompute (2*d) mod p in preparation for scalar multiplication.
-       w30 <= (w30 + w30) mod p = (2 * d) mod p */
-  bn.addm  w30, w30, w30
 
   /* Load the base point B (in affine coordinates).
        w6 <= dmem[ed25519_Bx] = B.x
@@ -754,7 +724,8 @@ affine_encode:
  *
  * @param[in]  w11: encoded point: y | (lsb(x) << 255)
  * @param[in]  w19: constant, w19 = 19
- * @param[in]  w30: constant, w30 = d = (-121665/121666) mod p
+ * @param[in]  w29: constant, d = (-121665/121666) mod p
+ * @param[in]  w30: constant, 38
  * @param[in]  w31: all-zero
  * @param[in]  MOD: p, modulus = 2^255 - 19
  * @param[out] x20: SUCCESS or FAILURE code
@@ -822,8 +793,8 @@ affine_decode_var:
    jal      x1, fe_square
    /* w26 <= (w22 - w25) mod p <= (y^2 - 1) mod p = u */
    bn.subm  w26, w22, w25
-   /* w22 <= (w22 * w30) mod p = (y^2 * d) mod p */
-   bn.mov   w23, w30
+   /* w22 <= (w22 * w29) mod p = (y^2 * d) mod p */
+   bn.mov   w23, w29
    jal      x1, fe_mul
    /* w25 <= (w22 + w25) mod p = (y^2 * d + 1) mod p = v */
    bn.addm  w25, w22, w25
@@ -862,13 +833,10 @@ affine_decode_var:
      instead of x to avoid confusion):
 
        Again, there are three cases:
-
        1.  If v r^2 = u (mod p), r is a square root.
-
        2.  If v r^2 = -u (mod p), set r <-- r * 2^((p-1)/4), which is a
            square root.
-
-       3.  Otherwise, no square root exists for modulo p, and decoding
+       3.  Otherwise, no square root exists for (u/v) modulo p, and decoding
            fails.
 
      Again the RFC doesn't really explain the mathematics here. Recall from the
@@ -911,7 +879,7 @@ affine_decode_var:
   /* FG0.Z <= (w22 - w26 == 0) = ((r^2 * v) mod p == u) */
   bn.cmp   w22, w26
   /* x2 <= FG0[3] = FG0.Z = ((r^2 * v) mod p == u) */
-  csrrs    x2, CSR_FG0, x0
+  csrrs    x2, FG0, x0
   and      x2, x2, x3
 
   /* Go to step 3, case 1 if we are in case 1. */
@@ -925,7 +893,7 @@ affine_decode_var:
   /* FG0.Z <= (w22 - w28 == 0) = ((r^2 * v) mod p == (-u) mod p) */
   bn.cmp   w22, w28
   /* x2 <= FG0[3] = FG0.Z = ((r^2 * v) mod p == (-u) mod p) */
-  csrrs    x2, CSR_FG0, x0
+  csrrs    x2, FG0, x0
   and      x2, x2, x3
 
   /* Go to step 3, case 2 if we are in case 2. */
@@ -999,19 +967,14 @@ affine_decode_var:
  * double-and-add cases for each, then selects one based on the next scalar
  * bit.
  *
- * Note: To speed up verification, where no secret scalars are involved, it
- * would be possible to do this in variable time and skip the double-add when
- * the scalar bit is 0. This would speed up scalar multiplication by
- * approximately 25% (because 50% of the time you skip 50% of the work).
- *
  * Note: To speed up both signing and verification (signing especially), many
  * implementations use a specialized implementation of multiplication by the
  * base point that looks up precomputed values from a table as described in the
  * original Ed25519 paper. However, this raises side-channel concerns because
- * the table lookups would be based on slices of the secret scalar. Additionally, each
- * point is 512 bits (even if stored in affine coordinates) so given limited
- * DMEM space we would only be able to use a maximum of 8 lookup values, even
- * assuming we consume all of DMEM.
+ * the table lookups would be based on slices of the secret scalar.
+ * Additionally, each point is 512 bits (even if stored in affine coordinates)
+ * so given limited DMEM space we would only be able to use a maximum of 8
+ * lookup values, even assuming we consume all of DMEM.
  *
  * This routine runs in constant time.
  *
@@ -1023,7 +986,8 @@ affine_decode_var:
  * @param[in]   w9: input T1 (T1 < p)
  * @param[in]  w19: constant, w19 = 19
  * @param[in]  w28: a, scalar input, a < L
- * @param[in]  w30: constant, w30 = (2*d) mod p, d = (-121665/121666) mod p
+ * @param[in]  w29: constant, d = (-121665/121666) mod p
+ * @param[in]  w30: constant, 38
  * @param[in]  w31: all-zero
  * @param[in]  MOD: p, modulus = 2^255 - 19
  * @param[out] w10: output X2
@@ -1109,22 +1073,120 @@ ext_scmul:
   ret
 
 /**
+ * Multiply a point by a scalar in extended twisted Edwards coordinates.
+ *
+ * Returns (X2, Y2, Z2, T2) = a * (X1, Y1, Z1, T1)
+ *
+ * Note: To save code size at the cost of verification performance, we could
+ * use the constant-time variant instead.
+ *
+ * This routine runs in variable time.
+ *
+ * Flags: Flags have no meaning beyond the scope of this subroutine.
+ *
+ * @param[in]   w6: input X1 (X1 < p)
+ * @param[in]   w7: input Y1 (Y1 < p)
+ * @param[in]   w8: input Z1 (Z1 < p)
+ * @param[in]   w9: input T1 (T1 < p)
+ * @param[in]  w19: constant, w19 = 19
+ * @param[in]  w28: a, scalar input, a < L
+ * @param[in]  w29: constant, d = (-121665/121666) mod p
+ * @param[in]  w30: constant, 38
+ * @param[in]  w31: all-zero
+ * @param[in]  MOD: p, modulus = 2^255 - 19
+ * @param[out] w10: output X2
+ * @param[out] w11: output Y2
+ * @param[out] w12: output Z2
+ * @param[out] w13: output T2
+ *
+ * clobbered registers: w10 to w18, w20 to w28
+ * clobbered flag groups: FG0
+ */
+.globl ext_scmul_var
+ext_scmul_var:
+  /* Initialize the intermediate result P to the origin point.
+       [w13:w10] <= (0, 1, 1, 0) */
+  bn.mov   w10, w31
+  bn.addi  w11, w31, 1
+  bn.addi  w12, w31, 1
+  bn.mov   w13, w31
+
+  /* Shift the 253-bit scalar value so the MSB is in position 255.
+       w28 <= w28 << 3 = a << 3 */
+  bn.rshi  w28, w28, w31 >> 253
+
+  /* Loop over the 253 bits of the scalar a.
+
+     Loop intermediate values:
+       P (intermediate result, starts at P = origin)
+
+     Loop invariants (at start of loop iteration i):
+       w28 = a << (i + 3)
+       [w9:w6] = (X1, Y1, Z1, T1)
+       [w13:w10] = P = (a[252:253-i]) * (X1, Y1, Z1, T1)
+    */
+  loopi  253, 11
+    /* Compute 2P = (P + P).
+         [w13:w10] <= [w13:w10] + [w13:w10] = 2P  */
+    jal      x1, ext_double
+
+    /* Set the M flag to the current bit of the scalar.
+         FG0.M <= w28[255] = (a << (i + 3))[255] = a[252-i] */
+    bn.addi  w28, w28, 0
+
+    /* Extract the M flag.
+         x2 <= FG0[1] << 1 = FG0.M ? 2 : 0 */
+    csrrs    x2, FG0, x0
+    andi     x2, x2, 2
+
+    /* If the flag is unset (a[252-i] = 0), skip the addition step. */
+    beq      x2, x0, _ext_scmul_var_loop_end
+
+    /* Add the original point to 2P.
+         [w13:w10] <= [w13:w10] + [w9:w6] = 2P + (X1, Y1, Z1, T1) */
+    bn.mov   w14, w6
+    bn.mov   w15, w7
+    bn.mov   w16, w8
+    bn.mov   w17, w9
+    jal      x1, ext_add
+
+   _ext_scmul_var_loop_end:
+    /* Shift the scalar value to prepare for the next loop iteration.
+         w28 <= w28 >> 1 = a << ((i + 1) + 3) */
+    bn.rshi  w28, w28, w31 >> 255
+
+  ret
+
+/**
  * Add a point to itself in extended twisted Edwards coordinates.
  *
  * Returns (X3, Y3, Z3, T3) = (X1, Y1, Z1, T1) + (X1, Y1, Z1, T1)
  *
- * This is a thin, convenient wrapper around ext_add.
+ * This implementation follows RFC 8032, section 5.1.4:
+ *   https://datatracker.ietf.org/doc/html/rfc8032#section-5.1.4
  *
- * Note: at the expense of code size, it is possible to speed up sign and
- * verify by optimizing the point addition formula for the special case of
- * doubling, but we do not currently do so.
+ * The formula is:
+ *  A = X1^2
+ *  B = Y1^2
+ *  C = 2*Z1^2
+ *  H = A+B
+ *  E = H-(X1+Y1)^2
+ *  G = A-B
+ *  F = C+G
+ *  X3 = E*F
+ *  Y3 = G*H
+ *  T3 = E*H
+ *  Z3 = F*G
+ *
+ * Note: to save code size at the cost of performance, we could use `ext_add`
+ * for everything instead.
  *
  * This routine runs in constant time.
  *
  * Flags: Flags have no meaning beyond the scope of this subroutine.
  *
  * @param[in]  w19: constant, w19 = 19
- * @param[in]  w30: constant, w30 = (2*d) mod p, d = (-121665/121666) mod p
+ * @param[in]  w30: constant, 38
  * @param[in]  w31: all-zero
  * @param[in]  MOD: p, modulus = 2^255 - 19
  * @param[in,out] w10: input X1 (X1 < p), output X3
@@ -1132,19 +1194,57 @@ ext_scmul:
  * @param[in,out] w12: input Z1 (Z1 < p), output Z3
  * @param[in,out] w13: input T1 (T1 < p), output T3
  *
- * clobbered registers: w10 to w18, w20 to w23, w24 to w27
+ * clobbered registers: w10 to w18, w20 to w27
  * clobbered flag groups: FG0
  */
 .globl ext_double
 ext_double:
-  /* [w17:w14] <= [w13:w10] = (X1, Y1, Z1, T1) */
-  bn.mov  w14, w10
-  bn.mov  w15, w11
-  bn.mov  w16, w12
-  bn.mov  w17, w13
+  /* w24 = (X1^2) = A */
+  bn.mov    w22, w10
+  jal       x1, fe_square
+  bn.mov    w24, w22
 
-  /* [w13:w10] <= [w13:w10] + [w17:w14] = (X3, Y3, Z3, T3) */
-  jal     x1, ext_add
+  /* w22 <= Y1^2 = B */
+  bn.mov    w22, w11
+  jal       x1, fe_square
+
+  /* w25 <= A + B = H */
+  bn.addm   w25, w24, w22
+
+  /* w24 <= A - B = G */
+  bn.subm   w24, w24, w22
+
+  /* w27 <= 2 * (Z1^2) = C */
+  bn.mov    w22, w12
+  jal       x1, fe_square
+  bn.addm   w27, w22, w22
+
+  /* w23 <= H - (X1+Y1)^2 = E */
+  bn.addm   w22, w10, w11
+  jal       x1, fe_square
+  bn.subm   w23, w25, w22
+
+  /* w10 <= (C+G)*E = X3 */
+  bn.addm   w22, w27, w24
+  jal       x1, fe_mul
+  bn.mov    w10, w22
+
+  /* w13 <= H*E = T3 */
+  bn.mov    w22, w25
+  jal       x1, fe_mul
+  bn.mov    w13, w22
+
+  /* w11 <= H*G <= Y3 */
+  bn.mov    w22, w25
+  bn.mov    w23, w24
+  jal       x1, fe_mul
+  bn.mov    w11, w22
+
+  /* w12 <= (C+G)*G <= Z3 */
+  bn.addm   w22, w27, w24
+  jal       x1, fe_mul
+  bn.mov    w12, w22
+
   ret
 
 /**
@@ -1185,7 +1285,7 @@ ext_double:
  *
  * @param[in]  w19: constant, 19
  * @param[in]  MOD: p, modulus = 2^255 - 19
- * @param[in]  w29: constant, (2*d) mod p, d = (-121665/121666) mod p
+ * @param[in]  w29: constant, d = (-121665/121666) mod p
  * @param[in]  w30: constant, 38
  * @param[in]  w31: all-zero
  * @param[in,out] w10: input X1 (X1 < p), output X3
@@ -1228,8 +1328,8 @@ ext_add:
 
   /* w22 <= w13 = T1 */
   bn.mov   w22, w13
-  /* w23 <= w29 <= 2*d */
-  bn.mov   w23, w29
+  /* w23 <= w29 + w29 <= 2*d */
+  bn.addm  w23, w29, w29
   /* w22 <= w22 * w23 = T1*2*d */
   jal      x1, fe_mul
   /* w23 <= w17 = T2 */
@@ -1358,7 +1458,7 @@ ext_equal_var:
   /* w16 <= w16 - w22 <= (X1 * Z2) - (X2 * Z1) */
   bn.sub  w16, w16, w22
   /* x2 <= FG0[3] = FG0.Z << 3 = result of check 1 */
-  csrrs    x2, CSR_FG0, x0
+  csrrs    x2, FG0, x0
   andi     x2, x2, 8
 
   /* Fail if the FG0.Z flag was unset. */
@@ -1390,7 +1490,7 @@ ext_equal_var:
   /* w16 <= w16 - w22 <= (Y1 * Z2) - (Y2 * Z1) */
   bn.sub  w16, w16, w22
   /* x2 <= FG0[3] = FG0.Z << 3 = result of check 2 */
-  csrrs    x2, CSR_FG0, x0
+  csrrs    x2, FG0, x0
   andi     x2, x2, 8
 
   /* Fail if the FG0.Z flag was unset. */

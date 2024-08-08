@@ -1,3 +1,7 @@
+/* Copyright zeroRISC Inc. */
+/* Licensed under the Apache License, Version 2.0, see LICENSE for details. */
+/* SPDX-License-Identifier: Apache-2.0 */
+
 /* Copyright lowRISC contributors (OpenTitan project). */
 /* Licensed under the Apache License, Version 2.0, see LICENSE for details. */
 /* SPDX-License-Identifier: Apache-2.0 */
@@ -22,15 +26,12 @@ main:
   /* Setup for coordinate field arithmetic. */
   jal     x1, fe_init
 
-  /* w30 <= 38 */
-  bn.addi w30, w31, 38
-
   /* Initialize failure counter to 0. */
   bn.mov  w0, w31
 
-  /* w29 <= (2*d) mod p. */
+  /* Initialize constant for ext_scmul. */
   li      x2, 29
-  la      x3, two_d
+  la      x3, ed25519_d
   bn.lid  x2, 0(x3)
 
   /* Run tests. */
@@ -108,7 +109,8 @@ run_ext_add_test:
  *
  * @param[in]     w19: constant, w19 = 19
  * @param[in]     MOD: p, modulus = 2^255 - 19
- * @param[in]     w30: constant, w30 = (2*d) mod p, d = (-121665/121666) mod p
+ * @param[in]     w29: constant, d = (-121665/121666) mod p
+ * @param[in]     w30: constant, 38
  * @param[in]     w31: all-zero
  * @param[in,out] w0:  test failure counter
  *
@@ -172,7 +174,8 @@ run_ext_scmul_zero_test:
  *
  * @param[in]     w19: constant, w19 = 19
  * @param[in]     MOD: p, modulus = 2^255 - 19
- * @param[in]     w30: constant, w30 = (2*d) mod p, d = (-121665/121666) mod p
+ * @param[in]     w29: constant, d = (-121665/121666) mod p
+ * @param[in]     w30: constant, 38
  * @param[in]     w31: all-zero
  * @param[in,out] w0:  test failure counter
  *
@@ -243,7 +246,8 @@ run_ext_scmul_order_test:
  *
  * @param[in]     w19: constant, w19 = 19
  * @param[in]     MOD: p, modulus = 2^255 - 19
- * @param[in]     w30: constant, w30 = (2*d) mod p, d = (-121665/121666) mod p
+ * @param[in]     w29: constant, d = (-121665/121666) mod p
+ * @param[in]     w30: constant, 38
  * @param[in]     w31: all-zero
  * @param[in,out] w0:  test failure counter
  *
@@ -401,17 +405,17 @@ ext_equal:
 
 .data
 
-/* Constant (2*d) mod p where d=(-121665/121666) mod p. */
+/* Constant d where d=(-121665/121666) mod p (from RFC 8032 section 5.1) */
 .balign 32
-two_d:
-  .word 0x26b2f159
-  .word 0xebd69b94
-  .word 0x8283b156
-  .word 0x00e0149a
-  .word 0xeef3d130
-  .word 0x198e80f2
-  .word 0x56dffce7
-  .word 0x2406d9dc
+ed25519_d:
+  .word 0x135978a3
+  .word 0x75eb4dca
+  .word 0x4141d8ab
+  .word 0x00700a4d
+  .word 0x7779e898
+  .word 0x8cc74079
+  .word 0x2b6ffe73
+  .word 0x52036cee
 
 /* Randomly-generated point P = (X, Y, Z, T) for testing. */
 

@@ -30,7 +30,7 @@ fe_init:
   li      x2, 19
   la      x3, field25519_p
   bn.lid  x2, 0(x3)
-  bn.wsrw 0x0, w19
+  bn.wsrw MOD, w19
 
   /* Load the constants 19 and 38. */
   bn.addi w19, w31, 19
