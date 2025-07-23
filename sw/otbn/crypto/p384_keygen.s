@@ -80,9 +80,9 @@ p384_random_scalar:
   bn.wsrr   w5, URND
   bn.xor    w9, w9, w5
 
-  /* Shift seed0 bits to get 448-bit seeds.
+  /* Shift bits to get 448-bit seeds.
      seed0 = [w7,w6]
-     w7 <= w7[192:0]
+     w7 <= w7[255:64]
 
      N.B. This has been intentionally separated from the shift of the seed1
      bits below in order to avoid transient side channel leakage from w7 and w9
@@ -96,7 +96,7 @@ p384_random_scalar:
 
   /* Shift seed1 bits to get 448-bit seeds.
      seed1 = [w9,w8]
-     w9 <= w9[192:0] */
+     w9 <= w9[255:64] */
   bn.rshi   w9, w31, w9 >> 64
 
   /* Generate a random 127-bit number.
