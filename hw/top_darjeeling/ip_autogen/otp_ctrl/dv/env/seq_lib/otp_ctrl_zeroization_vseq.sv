@@ -1,15 +1,11 @@
-// Copyright lowRISC contributors (OpenTitan project).
 // Copyright zeroRISC Inc.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 // smoke test vseq to walk through DAI states and request keys
 
-// `define PART_CONTENT_RANGE(i) \
-//     {[PART_BASE_ADDRS[``i``]: PART_OTP_SPECIALS_OFFSETS[``i``] - 1]}
-
-// Digest fields can be zeroized, but the zeroization field should be written to only when the
+// Digest markers can be zeroized, but the zeroization marker should be written to only when the
 // partition is designated to be zeroized.
-// The last 8 bytes or any partition is the zeroizible field, hence ignore it when generating legal
+// The last 8 bytes or any partition is the zeroizable marker, hence ignore it when generating legal
 // addresses to zeroize.
 `define PART_CONTENT_RANGE_ZER(i) \
     {[PartInfo[``i``].offset: PartInfo[``i``+1].offset - 9]}
@@ -19,7 +15,6 @@
 class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
   `uvm_object_utils(otp_ctrl_zeroization_vseq)
   `uvm_object_new
-
 
   rand bit set_dai_regwen;
   rand bit enable_trigger_checks;
@@ -117,6 +112,8 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
         dai_addr inside `PART_CONTENT_RANGE_ZER(Secret3Idx);
     solve part_idx before dai_addr;
   }
+`undef PART_CONTENT_RANGE
+`undef PART_CONTENT_RANGE_ZER
 
 
   task body();
@@ -129,7 +126,6 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
     bit dai_regwen_state = 1;
 
     for (int i = 0; i < NumPart; i++) begin
-      // part_idx = otp_ctrl_part_pkg::part_idx_e'(i);
       part_idx = i;
       `uvm_info(`gfn, $sformatf("part_idx :%s, addr offset :%x",
                                  part_idx.name, PartInfo[i].offset), UVM_LOW);
@@ -141,14 +137,12 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
     super.body();
     isr_present           = 1;
 
-
     this.rand_mode(0);
     this.dai_addr.rand_mode(1);
     this.part_idx.rand_mode(1);
 
     dut_init_completed = 0;
     trigger_routine_exit = 0;
-
 
     fork
       intr_service_routine();
@@ -160,7 +154,9 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
       // Now randomize the partitions and address to zeroize
       `DV_CHECK_RANDOMIZE_FATAL(this)
 
-      // First check if the partition zeroizable field is zeroized. If not set the field
+      // First check if the partition zeroizable marker is set for the partition that contains the
+      // DAI address that was generated in the randomize method above.
+      // If the marker is not set, first set the marker before zeroizing the address location.
       if (!part_is_zeroizable(part_idx)) begin
         `uvm_info(`gfn, $sformatf("ZRing Non Zeroizable Partition: part_idx :%s, dai_addr :%x",
                 part_idx.name, dai_addr), UVM_LOW);
@@ -171,7 +167,6 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
                   part_idx.name, zeroized_offset(part_idx)), UVM_LOW);
           dai_zeroize(.addr(zeroized_offset(part_idx)));
           zeroized_partition[part_idx] = 1;
-          cfg.clk_rst_vif.wait_clks(5);
           dai_rd(.addr(zeroized_offset(part_idx)), .rdata0(rdata0), .rdata1(rdata1),
                  .skip_idle_check(1));
         end
@@ -183,7 +178,6 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
 
         if (set_dai_regwen && dai_regwen_state) begin
           csr_rd(ral.direct_access_regwen, reg_rd_val);
-          cfg.clk_rst_vif.wait_clks(5);
           `uvm_info(`gfn, $sformatf("Setting DAI Regwen to zero - Locking DAI"), UVM_LOW);
           dai_regwen_state = 0;
           csr_wr(ral.direct_access_regwen, dai_regwen_state);
@@ -194,12 +188,9 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
         dai_zeroize(.addr(dai_addr));
         used_zeroized_addrs[dai_addr] = 1;
 
-        // Wait a cycle before issuing a read to direct_access_rdata registers to check if the
-        // address is zeroized
-        cfg.clk_rst_vif.wait_clks(1);
-
-        // Once Zeroization command completes, if zerorization is sucessful rdata0 and rdata1 should
-        // be return the current value of the zeroized otp location
+        // Once Zeroization command completes, if zerorization is successful rdata0 should return the
+        // count of ones in the bits updated depending on the granule size, and rdata1 should
+        // return 0
         csr_rd(ral.direct_access_rdata[0], rdata0);
         if (is_granule_64(dai_addr))
           csr_rd(ral.direct_access_rdata[1], rdata1);
@@ -209,12 +200,6 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
       end
     end
 
-    `uvm_info(`gfn, $sformatf("Starting Clock Delay - 1"), UVM_LOW);
-    // Wait a few clocks before issuing a readback to check if the address is zeroized and holds
-    // state post reset
-    cfg.clk_rst_vif.wait_clks(10);
-    `uvm_info(`gfn, $sformatf("Done Clock Delay - 1"), UVM_LOW);
-
     `uvm_info(`gfn, "Reseting OTP - Zeroization State should be saved", UVM_LOW);
     do_otp_ctrl_init = 0;
     dut_init();
@@ -223,23 +208,15 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
     // dut_init() also sets interrupt enables. For this sequence otp_operation_done is disabled as
     // we are expliciting testing otp_error.
 
+    // TODO: #80 (zerorisc/expo)
     // However the prediction model for otp_operation_done
     // does need a revisit to make sure the interrupt state registers are set at the time the RTL
     // also sets the same register and not the current way the model is coded
-
-
-    if (used_zeroized_addrs.num() != 0) begin
-      `uvm_info(`gfn, $sformatf("used_zeroized_addrs[]: %d", used_zeroized_addrs.num()), UVM_LOW);
-    end
 
     foreach (used_zeroized_addrs[addr]) begin
       `uvm_info(`gfn, $sformatf("Reading back ZRed Addr: %x", addr), UVM_LOW);
       dai_rd(.addr(addr), .rdata0(rdata0), .rdata1(rdata1), .skip_idle_check(1));
     end
-
-    `uvm_info(`gfn, $sformatf("Delay before sequence termination"), UVM_LOW);
-    cfg.clk_rst_vif.wait_clks(25);
-    `uvm_info(`gfn, $sformatf("Done Delay"), UVM_LOW);
 
     trigger_routine_exit = 1;
   endtask : body
@@ -267,14 +244,12 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
           wait (cfg.otp_ctrl_vif.pwr_otp_done_o == 1'b1);
           wait (dut_init_completed == 1);
 
-          `uvm_info(`gfn, $sformatf("(ISR) DUT Init Complete-Staring wait for Interrrupt"), UVM_LOW);
+          `uvm_info(`gfn, $sformatf("(ISR) DUT Init Complete-Starting wait for Interrrupt"), UVM_LOW);
           dut_init_completed = 0;
         end else if (cfg.intr_vif.pins[1] == 1'b1) begin
-          cfg.clk_rst_vif.wait_clks($urandom_range(5, 10));
           `uvm_info(`gfn, $sformatf("(ISR)- OTP Error Interrupt Seen"), UVM_LOW);
           csr_rd(ral.intr_state, csr_rd_value);
 
-          cfg.clk_rst_vif.wait_clks($urandom_range(5, 10));
           csr_rd(ral.status, csr_rd_value);
           csr_rd(ral.err_code[OtpDaiErrIdx], csr_rd_value);
         end
@@ -296,17 +271,17 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
 
       cfg.clk_rst_vif.wait_clks($urandom_range(10, 50));
       if (cfg.under_reset) begin
-        `uvm_info(`gfn, $sformatf("(CTR) - Wait until Otp Init is done"), UVM_LOW);
+        `uvm_info(`gfn, $sformatf("(CTR) - In Reset, Wait until Otp Init is done"), UVM_LOW);
         wait (cfg.under_reset == 0);
         wait (cfg.otp_ctrl_vif.pwr_otp_done_o == 1);
       end
 
-      `uvm_info(`gfn, $sformatf("(CTR) - Starting Threads"), UVM_LOW);
+      `uvm_info(`gfn, $sformatf("(CTR) - Starting Threads"), UVM_MEDIUM);
       fork
         begin : Thread1
-          `uvm_info(`gfn, $sformatf("(CTR)- Triggering Checks"), UVM_LOW);
+          `uvm_info(`gfn, $sformatf("(CTR)- Triggering Checks"), UVM_HIGH);
           trigger_checks(.val(check_trigger_val), .wait_done(1), .wait_backdoor(1));
-          `uvm_info(`gfn, $sformatf("(CTR)- Checks Completed"), UVM_LOW);
+          `uvm_info(`gfn, $sformatf("(CTR)- Checks Completed"), UVM_HIGH);
         end : Thread1
         begin : Thread2
             wait (cfg.under_reset);
@@ -315,10 +290,8 @@ class otp_ctrl_zeroization_vseq extends otp_ctrl_smoke_vseq;
       join_any
       disable fork;
 
-      `uvm_info(`gfn, $sformatf("(CTR) - Threads Disabled"), UVM_LOW);
+      `uvm_info(`gfn, $sformatf("(CTR) - Threads Disabled"), UVM_MEDIUM);
     end
   endtask : check_trigger_routine
 
 endclass : otp_ctrl_zeroization_vseq
-
-`undef PART_CONTENT_RANGE

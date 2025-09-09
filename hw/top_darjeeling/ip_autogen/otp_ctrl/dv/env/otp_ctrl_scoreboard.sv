@@ -199,24 +199,20 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
             exp_lc_data.state = otp_lc_data[LcCountWidth +: LcStateWidth];
 
             // Token values are depend on secret partitions value.
-            // exp_lc_data.test_unlock_token =
-            //         {<<32 {otp_a[TestUnlockTokenOffset/4 +: TestUnlockTokenSize/4]}};
-            // exp_lc_data.test_exit_token =
-            //         {<<32 {otp_a[TestExitTokenOffset/4 +: TestExitTokenSize/4]}};
-            // exp_lc_data.rma_token = {<<32 {otp_a[RmaTokenOffset/4 +: RmaTokenSize/4]}};
-
-
-            for (int unsigned chunk =0; chunk < (TestUnlockTokenSize/4); chunk++) begin
+            // exp_lc_data.test_unlock_token, exp_lc_data.test_exit_token, & exp_lc_data.rma_token
+            // are extracted out of the secret partition in 32bit chunks as the data in the secret
+            // partion is usually scrambled and it needs to be descrambled before use.
+            for (int unsigned chunk=0; chunk < (TestUnlockTokenSize/4); chunk++) begin
               exp_lc_data.test_unlock_token[(chunk*TL_DW) +: TL_DW] =
                                                   read_from_otp_a((TestUnlockTokenOffset/4)+ chunk);
             end
 
-            for (int unsigned chunk =0; chunk < (TestExitTokenSize/4); chunk++) begin
+            for (int unsigned chunk=0; chunk < (TestExitTokenSize/4); chunk++) begin
               exp_lc_data.test_exit_token[(chunk*TL_DW) +: TL_DW] =
                                                   read_from_otp_a((TestExitTokenOffset/4)+ chunk);
             end
 
-            for (int unsigned chunk =0; chunk < (RmaTokenSize/4); chunk++) begin
+            for (int unsigned chunk=0; chunk < (RmaTokenSize/4); chunk++) begin
               exp_lc_data.rma_token[(chunk*TL_DW) +: TL_DW] =
                                                   read_from_otp_a((RmaTokenOffset/4)+ chunk);
             end
@@ -245,11 +241,11 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
             exp_keymgr_data.creator_root_key_share0_valid = get_otp_digest_val(Secret2Idx) != 0;
             if (cfg.otp_ctrl_vif.lc_seed_hw_rd_en_i == lc_ctrl_pkg::On) begin
               for (int unsigned chunk =0; chunk < (CreatorRootKeyShare0Size/4); chunk++) begin
+                // Key manager data is also extracted from the otp in 32bit chunks as it also is
+                // hend in a secret partition and needs to be descrambled before use
                 exp_keymgr_data.creator_root_key_share0[(chunk*TL_DW) +: TL_DW] =
                                         read_from_otp_a((CreatorRootKeyShare0Offset/4)+ chunk);
               end
-              // exp_keymgr_data.creator_root_key_share0 =
-              //     {<<32 {otp_a[CreatorRootKeyShare0Offset/4 +: CreatorRootKeyShare0Size/4]}};
             end else begin
               exp_keymgr_data.creator_root_key_share0 =
                   top_darjeeling_rnd_cnst_pkg::RndCnstOtpCtrlPartInvDefault[CreatorRootKeyShare0Offset*8 +: CreatorRootKeyShare0Size*8];
@@ -260,11 +256,11 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
             exp_keymgr_data.creator_root_key_share1_valid = get_otp_digest_val(Secret2Idx) != 0;
             if (cfg.otp_ctrl_vif.lc_seed_hw_rd_en_i == lc_ctrl_pkg::On) begin
               for (int unsigned chunk =0; chunk < (CreatorRootKeyShare1Size/4); chunk++) begin
+                // Key manager data is also extracted from the otp in 32bit chunks as it also is
+                // hend in a secret partition and needs to be descrambled before use
                 exp_keymgr_data.creator_root_key_share1[(chunk*TL_DW) +: TL_DW] =
                                         read_from_otp_a((CreatorRootKeyShare1Offset/4)+ chunk);
               end
-              // exp_keymgr_data.creator_root_key_share1 =
-              //     {<<32 {otp_a[CreatorRootKeyShare1Offset/4 +: CreatorRootKeyShare1Size/4]}};
             end else begin
               exp_keymgr_data.creator_root_key_share1 =
                   top_darjeeling_rnd_cnst_pkg::RndCnstOtpCtrlPartInvDefault[CreatorRootKeyShare1Offset*8 +: CreatorRootKeyShare1Size*8];
@@ -275,11 +271,11 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
             exp_keymgr_data.creator_seed_valid = get_otp_digest_val(Secret2Idx) != 0;
             if (cfg.otp_ctrl_vif.lc_seed_hw_rd_en_i == lc_ctrl_pkg::On) begin
               for (int unsigned chunk =0; chunk < (CreatorSeedSize/4); chunk++) begin
+                // Key manager data is also extracted from the otp in 32bit chunks as it also is
+                // hend in a secret partition and needs to be descrambled before use
                 exp_keymgr_data.creator_seed[(chunk*TL_DW) +: TL_DW] =
                                         read_from_otp_a((CreatorSeedOffset/4)+ chunk);
               end
-              // exp_keymgr_data.creator_seed =
-              //     {<<32 {otp_a[CreatorSeedOffset/4 +: CreatorSeedSize/4]}};
             end else begin
               exp_keymgr_data.creator_seed =
                   top_darjeeling_rnd_cnst_pkg::RndCnstOtpCtrlPartInvDefault[CreatorSeedOffset*8 +: CreatorSeedSize*8];
@@ -290,11 +286,11 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
             exp_keymgr_data.owner_seed_valid = get_otp_digest_val(Secret3Idx) != 0;
             if (cfg.otp_ctrl_vif.lc_seed_hw_rd_en_i == lc_ctrl_pkg::On) begin
               for (int unsigned chunk =0; chunk < (OwnerSeedSize/4); chunk++) begin
+                // Key manager data is also extracted from the otp in 32bit chunks as it also is
+                // hend in a secret partition and needs to be descrambled before use
                 exp_keymgr_data.owner_seed[(chunk*TL_DW) +: TL_DW] =
                                         read_from_otp_a((OwnerSeedOffset/4)+ chunk);
               end
-              // exp_keymgr_data.owner_seed =
-              //     {<<32 {otp_a[OwnerSeedOffset/4 +: OwnerSeedSize/4]}};
             end else begin
               exp_keymgr_data.owner_seed =
                   top_darjeeling_rnd_cnst_pkg::RndCnstOtpCtrlPartInvDefault[OwnerSeedOffset*8 +: OwnerSeedSize*8];
@@ -701,10 +697,11 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
               end
             end
 
-            //TODO: operation_done (interrupt[0]) goes out of sync as the prediction logic wait till
-            //"status" register is read. This is fundamentally incorrect and needs to be fixed
-            //for now we shall disable the "intr_state" register data check once the validity of the
-            //interrupts is checked above.
+            // TODO: Issue #80 (zerorisc/expo)
+            // operation_done (interrupt[0]) goes out of sync as the prediction logic wait till
+            // "status" register is read. This is fundamentally incorrect and needs to be fixed
+            // for now we shall disable the "intr_state" register data check once the validity of
+            // the interrupts is checked above.
             do_read_check = 0;
           end
         end
@@ -829,8 +826,6 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
                   bit [TL_AW-1:0] otp_addr = get_scb_otp_addr();
                   int ecc_err = 0;
 
-
-
                   // Backdoor read to check if there is any ECC error.
                   if (part_has_integrity(part_idx)) begin
                     ecc_err = read_a_word_with_ecc(dai_addr, read_out0);
@@ -844,7 +839,8 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
                     end
                   end
 
-                  if (prt_zeroized && prt_has_digest && is_digest_addr) begin
+                  if (is_zeroized_addr(dai_addr)
+                      || (prt_zeroized && prt_has_digest && is_digest_addr)) begin
                     predict_no_err(OtpDaiErrIdx);
                     predict_rdata(is_granule_64(dai_addr), otp_a[otp_addr], otp_a[otp_addr+1]);
 
@@ -1002,7 +998,7 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
                   end
                 end else begin
                   bit [TL_DW*2-1:0] descrambled_val;
-                  bit [TL_DW-1:0]   rdata_ret_val = '{default:1};
+                  bit [TL_DW-1:0]   rdata_ret_val = '1;
 
                   // Partition is zeroizable
                   if (otp_addr == PART_OTP_ZEROIZED_ADDRS[part_idx]) begin
@@ -1016,13 +1012,14 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
                   predict_no_err(OtpDaiErrIdx);
                   dai_wr_ip = 1;
 
-                  // TODO: OTP Array in the scoreboard contains descrambled data! Not an actual
+                  // TODO: issue #81 (zerorisc/expo)
+                  // OTP Array in the scoreboard contains descrambled data! Not an actual
                   // reflection of the RTL. Need to figure out how to fix this
-                  descrambled_val = descramble_data('{default:1}, part_idx);
+                  descrambled_val = descramble_data('1, part_idx);
 
                   otp_a[otp_addr] = (   is_secret(dai_addr) && !is_zeroized_addr(dai_addr)
                                      && !is_digest(dai_addr))
-                                   ? descrambled_val[TL_DW-1:0]:'{default:1};
+                                   ? descrambled_val[TL_DW-1:0]:'1;
                   rdata_ret_val = is_granule_64(dai_addr) ? $countones(rdata_ret_val)*2
                                                           : $countones(rdata_ret_val);
                   void'(ral.direct_access_rdata[0].predict(.value(rdata_ret_val),
@@ -1031,7 +1028,7 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
                     `uvm_info(`gfn, $sformatf("Zeroizing Loc: setting upper 64bits"), UVM_LOW);
                     otp_a[otp_addr + 1] = (   is_secret(dai_addr) && !is_zeroized_addr(dai_addr)
                                            && !is_digest(dai_addr))
-                                         ? descrambled_val[TL_DW*2-1:TL_DW]:'{default:1};
+                                         ? descrambled_val[TL_DW*2-1:TL_DW]:'1;
                     void'(ral.direct_access_rdata[1].predict(.value(0),
                                                              .kind(UVM_PREDICT_READ)));
                   end
@@ -1441,7 +1438,7 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
   endfunction
 
   virtual function bit [TL_DW-1:0] read_from_otp_a(int addr);
-    bit [TL_DW-1:0] ret_data = '{default:0};
+    bit [TL_DW-1:0] ret_data = 0;
     bit [TL_DW-1:0] act_addr = addr<<2;
     otp_ctrl_part_pkg::part_idx_e part_idx = get_part_index(act_addr);
 
@@ -1459,7 +1456,8 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
     if (part_is_zeroized && part_is_secret) begin
       `uvm_info(`gfn, $sformatf("%s is zeroized and secret. Ret_data:%x",
                                  part_idx.name,  otp_a[addr]), UVM_HIGH);
-      // TODO: otp_a always contains descrambled data which is incorrect. Need to fix it and ensure
+      // TODO: issue #80 (zerorisc/expo)
+      // otp_a always contains descrambled data which is incorrect. Need to fix it and ensure
       // descrambling is done at places where secret data is be used.
       ret_data = otp_a[addr];
     end else begin
@@ -1886,7 +1884,6 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
   virtual function bit [SCRAMBLE_KEY_SIZE-1:0] get_key_from_otp(bit locked, int start_i);
     bit [SCRAMBLE_KEY_SIZE-1:0] key;
     if (!locked) return 0;
-    // for (int i = 0; i < 4; i++) key |= otp_a[i + start_i] << (TL_DW * i);
     for (int i = 0; i < 4; i++) key |= read_from_otp_a(i + start_i) << (TL_DW * i);
     return key;
   endfunction
@@ -1988,8 +1985,11 @@ class otp_ctrl_scoreboard #(type CFG_T = otp_ctrl_env_cfg)
   virtual function bit is_zeroized(int part_idx);
     if (part_is_zeroizable(part_idx)) begin
       bit [TL_DW-1:0] zeroized_addr = PART_OTP_ZEROIZED_ADDRS[part_idx];
-      return $countones(otp_a[zeroized_addr]) > 28 &&
-             $countones(otp_a[zeroized_addr + 1]) > 28;
+      return check_zeroized_valid(  $countones(otp_a[zeroized_addr])
+                                  + $countones(otp_a[zeroized_addr + 1]));
+
+      // return $countones(otp_a[zeroized_addr]) > 28 &&
+      //        $countones(otp_a[zeroized_addr + 1]) > 28;
     end else begin
       return 0;
     end

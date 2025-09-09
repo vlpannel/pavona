@@ -6,16 +6,16 @@
 from topgen.lib import Name
 from design.lib.OtpMemMap import get_part_by_name
 
-read_locked_csr_parts = [part for part in otp_mmap["partitions"] if
-                         part["read_lock"] == "CSR"]
+read_locked_csr_parts     = [part for part in otp_mmap["partitions"] if
+                             part["read_lock"] == "CSR"]
 write_locked_digest_parts = [part for part in otp_mmap["partitions"] if
                              part["write_lock"] == "Digest"]
-zeroizable_parts = [part for part in otp_mmap["partitions"] if
+zeroizable_parts          = [part for part in otp_mmap["partitions"] if
                              part["zeroizable"]]
-buf_parts_without_lc = [part for part in otp_mmap["partitions"] if
-                        part["variant"] == "Buffered"]
-secret_parts = [part for part in otp_mmap["partitions"] if
-                part["secret"]]
+buf_parts_without_lc      = [part for part in otp_mmap["partitions"] if
+                             part["variant"] == "Buffered"]
+secret_parts              = [part for part in otp_mmap["partitions"] if
+                             part["secret"]]
 ## Partitions + LCI + DAI
 num_err_code = len(otp_mmap["partitions"]) + 2
 %>\
@@ -217,24 +217,20 @@ else:
             exp_lc_data.state = otp_lc_data[LcCountWidth +: LcStateWidth];
 
             // Token values are depend on secret partitions value.
-            // exp_lc_data.test_unlock_token =
-            //         {<<32 {otp_a[TestUnlockTokenOffset/4 +: TestUnlockTokenSize/4]}};
-            // exp_lc_data.test_exit_token =
-            //         {<<32 {otp_a[TestExitTokenOffset/4 +: TestExitTokenSize/4]}};
-            // exp_lc_data.rma_token = {<<32 {otp_a[RmaTokenOffset/4 +: RmaTokenSize/4]}};
-
-
-            for (int unsigned chunk =0; chunk < (TestUnlockTokenSize/4); chunk++) begin
+            // exp_lc_data.test_unlock_token, exp_lc_data.test_exit_token, & exp_lc_data.rma_token
+            // are extracted out of the secret partition in 32bit chunks as the data in the secret
+            // partion is usually scrambled and it needs to be descrambled before use.
+            for (int unsigned chunk=0; chunk < (TestUnlockTokenSize/4); chunk++) begin
               exp_lc_data.test_unlock_token[(chunk*TL_DW) +: TL_DW] =
                                                   read_from_otp_a((TestUnlockTokenOffset/4)+ chunk);
             end
 
-            for (int unsigned chunk =0; chunk < (TestExitTokenSize/4); chunk++) begin
+            for (int unsigned chunk=0; chunk < (TestExitTokenSize/4); chunk++) begin
               exp_lc_data.test_exit_token[(chunk*TL_DW) +: TL_DW] =
                                                   read_from_otp_a((TestExitTokenOffset/4)+ chunk);
             end
 
-            for (int unsigned chunk =0; chunk < (RmaTokenSize/4); chunk++) begin
+            for (int unsigned chunk=0; chunk < (RmaTokenSize/4); chunk++) begin
               exp_lc_data.rma_token[(chunk*TL_DW) +: TL_DW] =
                                                   read_from_otp_a((RmaTokenOffset/4)+ chunk);
             end
@@ -274,11 +270,11 @@ else:
             exp_keymgr_data.${item["name"].lower()}_valid = get_otp_digest_val(${part_name_camel}Idx) != 0;
             if (cfg.otp_ctrl_vif.lc_seed_hw_rd_en_i == lc_ctrl_pkg::On) begin
               for (int unsigned chunk =0; chunk < (${item_name_camel}Size/4); chunk++) begin
+                // Key manager data is also extracted from the otp in 32bit chunks as it also is
+                // hend in a secret partition and needs to be descrambled before use
                 exp_keymgr_data.${item["name"].lower()}[(chunk*TL_DW) +: TL_DW] =
                                         read_from_otp_a((${item_name_camel}Offset/4)+ chunk);
               end
-              // exp_keymgr_data.${item["name"].lower()} =
-              //     {<<32 {otp_a[${item_name_camel}Offset/4 +: ${item_name_camel}Size/4]}};
             end else begin
               exp_keymgr_data.${item["name"].lower()} =
                   top_${topname}_rnd_cnst_pkg::RndCnstOtpCtrlPartInvDefault[${item_name_camel}Offset*8 +: ${item_name_camel}Size*8];
@@ -737,10 +733,11 @@ else:
               end
             end
 
-            //TODO: operation_done (interrupt[0]) goes out of sync as the prediction logic wait till
-            //"status" register is read. This is fundamentally incorrect and needs to be fixed
-            //for now we shall disable the "intr_state" register data check once the validity of the
-            //interrupts is checked above.
+            // TODO: Issue #80 (zerorisc/expo)
+            // operation_done (interrupt[0]) goes out of sync as the prediction logic wait till
+            // "status" register is read. This is fundamentally incorrect and needs to be fixed
+            // for now we shall disable the "intr_state" register data check once the validity of
+            // the interrupts is checked above.
             do_read_check = 0;
           end
         end
@@ -846,8 +843,6 @@ else:
                   bit [TL_AW-1:0] otp_addr = get_scb_otp_addr();
                   int ecc_err = 0;
 
-
-
                   // Backdoor read to check if there is any ECC error.
                   if (part_has_integrity(part_idx)) begin
                     ecc_err = read_a_word_with_ecc(dai_addr, read_out0);
@@ -861,7 +856,8 @@ else:
                     end
                   end
 
-                  if (prt_zeroized && prt_has_digest && is_digest_addr) begin
+                  if (is_zeroized_addr(dai_addr)
+                      || (prt_zeroized && prt_has_digest && is_digest_addr)) begin
                     predict_no_err(OtpDaiErrIdx);
                     predict_rdata(is_granule_64(dai_addr), otp_a[otp_addr], otp_a[otp_addr+1]);
 
@@ -1019,7 +1015,7 @@ else:
                   end
                 end else begin
                   bit [TL_DW*2-1:0] descrambled_val;
-                  bit [TL_DW-1:0]   rdata_ret_val = '{default:1};
+                  bit [TL_DW-1:0]   rdata_ret_val = '1;
 
                   // Partition is zeroizable
                   if (otp_addr == PART_OTP_ZEROIZED_ADDRS[part_idx]) begin
@@ -1033,13 +1029,14 @@ else:
                   predict_no_err(OtpDaiErrIdx);
                   dai_wr_ip = 1;
 
-                  // TODO: OTP Array in the scoreboard contains descrambled data! Not an actual
+                  // TODO: issue #81 (zerorisc/expo)
+                  // OTP Array in the scoreboard contains descrambled data! Not an actual
                   // reflection of the RTL. Need to figure out how to fix this
-                  descrambled_val = descramble_data('{default:1}, part_idx);
+                  descrambled_val = descramble_data('1, part_idx);
 
                   otp_a[otp_addr] = (   is_secret(dai_addr) && !is_zeroized_addr(dai_addr)
                                      && !is_digest(dai_addr))
-                                   ? descrambled_val[TL_DW-1:0]:'{default:1};
+                                   ? descrambled_val[TL_DW-1:0]:'1;
                   rdata_ret_val = is_granule_64(dai_addr) ? $countones(rdata_ret_val)*2
                                                           : $countones(rdata_ret_val);
                   void'(ral.direct_access_rdata[0].predict(.value(rdata_ret_val),
@@ -1048,7 +1045,7 @@ else:
                     `uvm_info(`gfn, $sformatf("Zeroizing Loc: setting upper 64bits"), UVM_LOW);
                     otp_a[otp_addr + 1] = (   is_secret(dai_addr) && !is_zeroized_addr(dai_addr)
                                            && !is_digest(dai_addr))
-                                         ? descrambled_val[TL_DW*2-1:TL_DW]:'{default:1};
+                                         ? descrambled_val[TL_DW*2-1:TL_DW]:'1;
                     void'(ral.direct_access_rdata[1].predict(.value(0),
                                                              .kind(UVM_PREDICT_READ)));
                   end
@@ -1239,7 +1236,7 @@ else:
   endfunction
 
   virtual function bit [TL_DW-1:0] read_from_otp_a(int addr);
-    bit [TL_DW-1:0] ret_data = '{default:0};
+    bit [TL_DW-1:0] ret_data = 0;
     bit [TL_DW-1:0] act_addr = addr<<2;
     otp_ctrl_part_pkg::part_idx_e part_idx = get_part_index(act_addr);
 
@@ -1257,7 +1254,8 @@ else:
     if (part_is_zeroized && part_is_secret) begin
       `uvm_info(`gfn, $sformatf("%s is zeroized and secret. Ret_data:%x",
                                  part_idx.name,  otp_a[addr]), UVM_HIGH);
-      // TODO: otp_a always contains descrambled data which is incorrect. Need to fix it and ensure
+      // TODO: issue #80 (zerorisc/expo)
+      // otp_a always contains descrambled data which is incorrect. Need to fix it and ensure
       // descrambling is done at places where secret data is be used.
       ret_data = otp_a[addr];
     end else begin
@@ -1572,7 +1570,6 @@ else:
   virtual function bit [SCRAMBLE_KEY_SIZE-1:0] get_key_from_otp(bit locked, int start_i);
     bit [SCRAMBLE_KEY_SIZE-1:0] key;
     if (!locked) return 0;
-    // for (int i = 0; i < 4; i++) key |= otp_a[i + start_i] << (TL_DW * i);
     for (int i = 0; i < 4; i++) key |= read_from_otp_a(i + start_i) << (TL_DW * i);
     return key;
   endfunction
@@ -1608,8 +1605,11 @@ else:
   virtual function bit is_zeroized(int part_idx);
     if (part_is_zeroizable(part_idx)) begin
       bit [TL_DW-1:0] zeroized_addr = PART_OTP_ZEROIZED_ADDRS[part_idx];
-      return $countones(otp_a[zeroized_addr]) > 28 &&
-             $countones(otp_a[zeroized_addr + 1]) > 28;
+      return check_zeroized_valid(  $countones(otp_a[zeroized_addr])
+                                  + $countones(otp_a[zeroized_addr + 1]));
+
+      // return $countones(otp_a[zeroized_addr]) > 28 &&
+      //        $countones(otp_a[zeroized_addr + 1]) > 28;
     end else begin
       return 0;
     end
