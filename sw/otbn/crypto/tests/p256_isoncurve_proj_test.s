@@ -16,7 +16,7 @@ p256_oncurve_proj_test:
   /* Initialize all-zero register. */
   bn.xor   w31, w31, w31
 
-  /* Compute both sides of the Weierstrauss equation.
+  /* Compute both sides of the Weierstrass equation.
        w18 <= lhs
        w19 <= rhs */
   jal      x1, p256_isoncurve_proj
