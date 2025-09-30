@@ -1,3 +1,7 @@
+// Copyright zeroRISC Inc.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 // Copyright lowRISC contributors (OpenTitan project).
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
@@ -36,24 +40,6 @@ static uint32_t kTestModulus[kRsa2048NumWords] = {
     0x639f9975, 0x5948488b, 0x1d3d9cd7, 0x28c7956b, 0xebb97a3e, 0x1edbf4e2,
     0x105cc797, 0x924ec514, 0x146810df, 0xb1ab4a49,
 };
-static uint32_t kTestPrivateExponent[kRsa2048NumWords] = {
-    0x0b19915b, 0xa6a935e6, 0x426b2e10, 0xb4ff0629, 0x7322343b, 0x3f28c8d5,
-    0x190757ce, 0x87409d6b, 0xd88e282b, 0x01c13c2a, 0xebb79189, 0x74cbeab9,
-    0x93de5d54, 0xae1bc80a, 0x083a75f2, 0xd574d229, 0xeb46696e, 0x7648cfb6,
-    0xe7ad1b36, 0xbd0e81b2, 0x19c72703, 0xebea5085, 0xf8c7d152, 0x34dcf84d,
-    0xa437187f, 0x41e4f88e, 0xe4e35f9f, 0xcd8bc6f8, 0x7f98e2f2, 0xffdf75ca,
-    0x3698226e, 0x903f2a56, 0xbf21a6dc, 0x97cbf653, 0xe9d80cb3, 0x55dc1685,
-    0xe0ebae21, 0xc8171e18, 0x8e73d26d, 0xbbdbaac1, 0x886e8007, 0x673c9da4,
-    0xe2cb0698, 0xa9f1ba2d, 0xedab4f0a, 0x197e890c, 0x65e7e736, 0x1de28f24,
-    0x57cf5137, 0x631ff441, 0x22539942, 0xcee3fd41, 0xd22b5f8a, 0x995dd87a,
-    0xcaa6815c, 0x08ca0fd3, 0x8f996093, 0x30b7c446, 0xf69b11f7, 0xa298dd00,
-    0xfd4e8120, 0x059df602, 0x25feb268, 0x0f3f749e,
-};
-static uint32_t kTestPublicExponent = 65537;
-
-// Key mode for testing.
-static otcrypto_key_mode_t kTestKeyMode = kOtcryptoKeyModeRsaSignPss;
-
 // The prime cofactor p for the test private key.
 static uint32_t kTestPrimeP[kRsa2048CofactorNumWords] = {
     0x69e8cdeb, 0xaab5698,  0x2adbf5a2, 0xc6f3fed7, 0x9b0f148c, 0x68a4b636,
@@ -66,12 +52,53 @@ static uint32_t kTestPrimeP[kRsa2048CofactorNumWords] = {
 // The prime cofactor q for the test private key.
 static uint32_t kTestPrimeQ[kRsa2048CofactorNumWords] = {
     0xc69864d3, 0x6eca1793, 0xd985ff65, 0xa888cce8, 0xcadcabc5, 0x47d31ff8,
-    0x2eae994a, 0xba8594d,  0x956889ed, 0x117f0b01, 0x30ace812, 0x89aa41b9,
+    0x2eae994a, 0x0ba8594d, 0x956889ed, 0x117f0b01, 0x30ace812, 0x89aa41b9,
     0x716c8c93, 0xb3e54154, 0x70020ae3, 0x3f3926af, 0x91ae5a18, 0xa058daef,
     0xd5a8a0ee, 0xff73e9fb, 0xda00591c, 0x69220aec, 0xe9ee684b, 0x12f4ea77,
-    0xea538fb5, 0x505826e,  0xef416b24, 0x5c65d8d6, 0xce422bd4, 0x3f4f37ed,
+    0xea538fb5, 0x0505826e, 0xef416b24, 0x5c65d8d6, 0xce422bd4, 0x3f4f37ed,
     0xdd6aff12, 0xf6c55808,
 };
+
+static uint32_t kTestPrivateExponentComponentP[kRsa2048CofactorNumWords] = {
+    0x450b9217, 0x4edd47a6, 0x65eaa581, 0xa489536c, 0x46c6416e, 0xcdcd3461,
+    0x07ba3fc0, 0x95d56f89, 0xcf3c23f1, 0x3a09db7b, 0x841780f5, 0x3ee50c5d,
+    0x6858dd49, 0xf56e4c70, 0x872d1012, 0xe23c883f, 0x24170efd, 0xeb61ae33,
+    0xd05cb6b7, 0x81db8c2f, 0x1cd58c9b, 0xa828fecf, 0x09db577e, 0xcdc21d77,
+    0x9ebfb60c, 0xbacad629, 0x98bc44a7, 0x8498e6dc, 0x399dc28f, 0x95d22e4d,
+    0x7b1d095d, 0xacc9ede5,
+};
+
+static uint32_t kTestPrivateExponentComponentQ[kRsa2048CofactorNumWords] = {
+    0x1294bbf7, 0x8b2919b9, 0x19e6e6bb, 0x5bac57cf, 0x94878d05, 0xdd0297c9,
+    0xc2fa4a31, 0x250dbc5d, 0xa6e04ae3, 0xc4f6deb7, 0x5d21fd5f, 0x6e02cdea,
+    0xb967b151, 0x1324bb70, 0xe7c7e19a, 0x93faa85b, 0xcea179ee, 0xda7b268f,
+    0xb4953e88, 0x5da887cf, 0xf3475b09, 0xf0f59bd2, 0xd783b40b, 0x871df1f6,
+    0x7781156f, 0x2d8a9b67, 0xf1555281, 0xdf14b659, 0x85d12616, 0x28f80092,
+    0x50663f6f, 0xb2191d7f,
+};
+
+static uint32_t kTestCrtCoefficientQinvP[kRsa2048CofactorNumWords] = {
+    0x8678e23f, 0x208181a5, 0x4c846651, 0xd7015b89, 0x75c82ec3, 0x9ab976a8,
+    0xdc502277, 0xe354d4f1, 0x57b4eecb, 0x347c059,  0xf98ab29f, 0x38b694ec,
+    0x8ef8acf0, 0xd530b8a6, 0x36cf279f, 0xacdb1beb, 0xc89e371d, 0xe9080f0f,
+    0x05f32291, 0x4c4cc843, 0x4f7bd2e4, 0xa158cc81, 0x2b3fdadf, 0x20b88f37,
+    0x5e424f2a, 0x41794ace, 0x86297642, 0x1472ceaa, 0xeedce93a, 0xad62154d,
+    0xae949fc6, 0x267d8cbc,
+};
+
+static uint32_t kTestCrtCoefficientPinvQ[kRsa2048CofactorNumWords] = {
+    0xff019a0f, 0x58ec641a, 0xa8b6a4dc, 0x338e8a6a, 0xb98e701c, 0xe710b453,
+    0xc7b5ee24, 0x4268bb56, 0xf7474ef4, 0x6f88b191, 0x2079740b, 0x24cf5722,
+    0xce523e5d, 0xb5aeb747, 0x963673,   0x564f2e69, 0x7124e565, 0x73e023aa,
+    0xca525e98, 0x483a1ec4, 0x46f0f3fd, 0x5fc69d0d, 0x55b96618, 0x8612dc35,
+    0x43b77913, 0xc00a23fc, 0xdf0ce49d, 0x28b92fa7, 0xca347165, 0xb3634a2,
+    0x9c351d76, 0xc33ccc12,
+};
+
+static uint32_t kTestPublicExponent = 65537;
+
+// Key mode for testing.
+static otcrypto_key_mode_t kTestKeyMode = kOtcryptoKeyModeRsaSignPss;
 
 /**
  * Helper function to run the key-from-cofactor routine.
@@ -84,7 +111,8 @@ static uint32_t kTestPrimeQ[kRsa2048CofactorNumWords] = {
  * @param cofactor Pointer to the cofactor data.
  * @return OK or error.
  */
-static status_t run_key_from_cofactor(const uint32_t *cofactor) {
+static status_t run_key_from_cofactor(const uint32_t *cofactor,
+                                      const bool cofactor_is_p) {
   // Create two shares for the cofactor (second share is all-zero).
   otcrypto_const_word32_buf_t cofactor_share0 = {
       .data = cofactor,
@@ -141,11 +169,27 @@ static status_t run_key_from_cofactor(const uint32_t *cofactor) {
   // keyblobs, and will need to be updated if the representation changes.
   TRY_CHECK(private_key.keyblob_length == sizeof(rsa_2048_private_key_t));
   rsa_2048_private_key_t *sk = (rsa_2048_private_key_t *)private_key.keyblob;
-  TRY_CHECK_ARRAYS_EQ(sk->d.data, kTestPrivateExponent,
-                      ARRAYSIZE(kTestPrivateExponent));
+  if (cofactor_is_p) {
+    TRY_CHECK_ARRAYS_EQ(sk->p.data, kTestPrimeQ, ARRAYSIZE(kTestPrimeQ));
+    TRY_CHECK_ARRAYS_EQ(sk->q.data, kTestPrimeP, ARRAYSIZE(kTestPrimeP));
+    TRY_CHECK_ARRAYS_EQ(sk->d_p.data, kTestPrivateExponentComponentQ,
+                        ARRAYSIZE(kTestPrivateExponentComponentQ));
+    TRY_CHECK_ARRAYS_EQ(sk->d_q.data, kTestPrivateExponentComponentP,
+                        ARRAYSIZE(kTestPrivateExponentComponentP));
+    TRY_CHECK_ARRAYS_EQ(sk->i_q.data, kTestCrtCoefficientPinvQ,
+                        ARRAYSIZE(kTestCrtCoefficientPinvQ));
+  } else {
+    TRY_CHECK_ARRAYS_EQ(sk->p.data, kTestPrimeP, ARRAYSIZE(kTestPrimeP));
+    TRY_CHECK_ARRAYS_EQ(sk->q.data, kTestPrimeQ, ARRAYSIZE(kTestPrimeQ));
+    TRY_CHECK_ARRAYS_EQ(sk->d_p.data, kTestPrivateExponentComponentP,
+                        ARRAYSIZE(kTestPrivateExponentComponentP));
+    TRY_CHECK_ARRAYS_EQ(sk->d_q.data, kTestPrivateExponentComponentQ,
+                        ARRAYSIZE(kTestPrivateExponentComponentQ));
+    TRY_CHECK_ARRAYS_EQ(sk->i_q.data, kTestCrtCoefficientQinvP,
+                        ARRAYSIZE(kTestCrtCoefficientQinvP));
+  }
 
   // Check the other values too, just to be safe.
-  TRY_CHECK_ARRAYS_EQ(sk->n.data, kTestModulus, ARRAYSIZE(kTestModulus));
   TRY_CHECK(public_key.key_length == sizeof(rsa_2048_public_key_t));
   rsa_2048_public_key_t *pk = (rsa_2048_public_key_t *)public_key.key;
   TRY_CHECK_ARRAYS_EQ(pk->n.data, kTestModulus, ARRAYSIZE(kTestModulus));
@@ -154,11 +198,11 @@ static status_t run_key_from_cofactor(const uint32_t *cofactor) {
 }
 
 status_t keypair_from_p_test(void) {
-  return run_key_from_cofactor(kTestPrimeP);
+  return run_key_from_cofactor(kTestPrimeP, true);
 }
 
 status_t keypair_from_q_test(void) {
-  return run_key_from_cofactor(kTestPrimeQ);
+  return run_key_from_cofactor(kTestPrimeQ, false);
 }
 
 OTTF_DEFINE_TEST_CONFIG();

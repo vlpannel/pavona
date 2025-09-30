@@ -358,6 +358,11 @@ rsa_key_from_cofactor:
   li       x20, 20
   li       x21, 21
 
+  /* Compute (<# of limbs> - 1), a helpful constant for later computations.
+       x31 <= x30 - 1 */
+  addi     x2, x0, 1
+  sub      x31, x30, x2
+
   /* Get a pointer to the end of the cofactor.
        x2 <= rsa_cofactor + plen*32 */
   slli     x2, x30, 5
@@ -398,15 +403,52 @@ rsa_key_from_cofactor:
     bn.lid   x3, 0(x11++)
     bn.sid   x3, 0(x2++)
 
+  /* Derive the private exponent d from p and q (tail-call). */
+  jal      x1, derive_d
+
+  /* Restore constants from above for use in `prepare_pm1qm1`.
+       x20 <= 20
+       x31 <= x30 - 1 */
+  li       x20, 20
+  addi     x2, x0, 1
+  sub      x31, x30, x2
+
+  /* Compute p - 1 and q - 1.
+       dmem[rsa_pm1..rsa_pm1+(plen*32)] <= p - 1. 
+       dmem[rsa_qm1..rsa_qm1+(plen*32)] <= q - 1. */
+  jal      x1, prepare_pm1qm1 
+
+  /* Compute CRT component d_p. 
+       dmem[rsa_d_p..rsa_d_p+(plen*32)] <= d mod (p - 1). */
+  la       x10, rsa_d_p 
+  la       x11, rsa_pm1
+  jal      x1, derive_crt_component
+
+  /* Compute CRT component d_q. 
+       dmem[rsa_d_q..rsa_d_q+(plen*32)] <= d mod (q - 1). */
+  la       x10, rsa_d_q 
+  la       x11, rsa_qm1
+  jal      x1, derive_crt_component
+
+  /* Compute CRT coefficient i_q, the inverse of q mod p 
+     (tail-call).
+       dmem[rsa_i_q..rsa_i_q+(plen*32)] <= q^(-1) mod p. */
+  la       x11, rsa_q
+  la       x12, rsa_p
+  la       x13, rsa_i_q
+  la       x14, rsa_pm1
+  la       x15, rsa_qm1
+  la       x16, mont_m0inv
+  la       x17, mont_rr
+  la       x18, tmp_scratchpad
+  jal      x1, modinv
+
   /* Multiply p and q to get the public modulus n.
        dmem[rsa_n..rsa_n+(plen*2*32)] <= p * q */
   la       x10, rsa_p
   la       x11, rsa_q
   la       x12, rsa_n
-  jal      x1, bignum_mul
-
-  /* Derive the private exponent d from p and q (tail-call). */
-  jal      x0, derive_d
+  jal      x0, bignum_mul
 
 /**
  * Compute the inverse of 65537 modulo a given number.
