@@ -195,9 +195,6 @@ modexp:
  * The squared Montgomery modulus RR and the Montgomery constant m0' have to
  * be precomputed and provided at the appropriate locations in dmem.
  *
- * Flags: The states of both FG0 and FG1 depend on intermediate values and are
- *        not usable after return.
- *
  * The base bignum A is expected in the input buffer, the primes in the p and q
  * buffers, the CRT components of the exponent E in the exp_p and exp_q buffers,
  * and the CRT reconstruction coefficient in the q_p buffer. The result C is
@@ -205,6 +202,9 @@ modexp:
  *
  * Note that the content of the exp_p and exp_q buffers will be modified during
  * computation.
+ *
+ * Flags: The states of both FG0 and FG1 depend on intermediate values and are
+ *        not usable after return.
  *
  * @param[in]   x2: dptr_c, dmem pointer to buffer for output C
  * @param[in]   x3: dptr_exp, work buffer for `modexp` calls
@@ -220,7 +220,7 @@ modexp:
  * @param[in]  x28: dptr_q, dmem pointer to first limb of cofactor q
  * @param[in]  x29: dptr_q_p, dmem pointer to first limb of CRT reconstruction
        coefficient q_p
- * @param[in]  x30: N, number of limbs per bignum
+ * @param[in]  x30: N, number of limbs per bignum (must be even)
  * @param[in]  w31: all-zero
  * @param[out] dmem[dptr_c:dptr_c+N*32] C, A^E mod M
  *
@@ -235,7 +235,7 @@ modexp_crt:
   srli      x30, x30, 1
 
   /* copy the second cofactor, q, into the exp buffer to zero-extend
-       dmem[dptr_exp:dptr_exp+(N/2)*32] <= p */
+       dmem[dptr_exp:dptr_exp+(N/2)*32] <= q */
   addi      x11, x28, 0
   addi      x12, x3, 0
   li        x20, 20
@@ -269,7 +269,9 @@ modexp_crt:
   addi      x7, x25, 0
   addi      x9, x26, 0
 
-  /* compute input A modulo seocnd cofactor, q
+  /* compute input A modulo second cofactor, q; here, we take advantage of the
+     fact that div overwrites its input A with the remainder A mod q as a side
+     effect, and we discard the quotient
        dmem[dptr_reduce:dptr_reduce+N*32] <= A mod q */
   addi      x10, x4, 0
   addi      x11, x3, 0

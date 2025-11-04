@@ -55,7 +55,6 @@ static uint32_t kTestModulus[kRsa3072NumWords] = {
     0x7520180f, 0x24ec935f, 0xa90cc23b, 0xafe74287, 0x31261907, 0xa60f30a2,
 };
 
-
 static uint32_t kTestCofactorP[kRsa3072NumWords / 2] = {
     0x2dcdaa29, 0xa5479f83, 0xf0865f20, 0xa00e6b5c, 0xda2f3b0b, 0xe25ee188,
     0xda871b22, 0x7f3c5312, 0x70d3dbb9, 0x18b5d5c4, 0x6aab200b, 0x4e0f3f82,

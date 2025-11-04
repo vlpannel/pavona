@@ -88,6 +88,13 @@ otbn_library(
 )
 
 otbn_library(
+    name = "modinv",
+    srcs = [
+        "modinv.s",
+    ],
+)
+
+otbn_library(
     name = "montmul",
     srcs = [
         "montmul.s",
@@ -298,6 +305,7 @@ otbn_binary(
         ":div",
         ":gcd",
         ":lcm",
+        ":modinv",
         ":montmul",
         ":mul",
         ":primality",

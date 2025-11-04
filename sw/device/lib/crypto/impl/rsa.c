@@ -184,7 +184,8 @@ otcrypto_status_t otcrypto_rsa_private_key_from_exponents(
     otcrypto_const_word32_buf_t d_p, otcrypto_const_word32_buf_t d_q,
     otcrypto_const_word32_buf_t i_q, otcrypto_blinded_key_t *private_key) {
   if (p.data == NULL || q.data == NULL || d_p.data == NULL ||
-      d_q.data == NULL || private_key == NULL || private_key->keyblob == NULL) {
+      d_q.data == NULL || i_q.data == NULL || private_key == NULL ||
+      private_key->keyblob == NULL) {
     return OTCRYPTO_BAD_ARGS;
   }
   // Entropy complex must be initialized for `hardened_memcpy`.

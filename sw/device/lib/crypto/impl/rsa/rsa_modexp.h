@@ -61,7 +61,7 @@ status_t rsa_modexp_consttime_2048_start(const rsa_2048_int_t *base,
  *
  * @param base Exponentiation base.
  * @param exp_p First CRT component of exponent to raise the base to.
- * @param exp_q Seocnd CRT component of exponent to raise the base to.
+ * @param exp_q Second CRT component of exponent to raise the base to.
  * @param crt_coeff CRT coefficient for exponentiation (inverse of q mod p).
  * @param modulus_p First cofactor of modulus for exponentiation.
  * @param modulus_q Second cofactor of modulus for exponentiation.
@@ -130,7 +130,7 @@ status_t rsa_modexp_consttime_3072_start(const rsa_3072_int_t *base,
  *
  * @param base Exponentiation base.
  * @param exp_p First CRT component of exponent to raise the base to.
- * @param exp_q Seocnd CRT component of exponent to raise the base to.
+ * @param exp_q Second CRT component of exponent to raise the base to.
  * @param crt_coeff CRT coefficient for exponentiation (inverse of q mod p).
  * @param modulus_p First cofactor of modulus for exponentiation.
  * @param modulus_q Second cofactor of modulus for exponentiation.
@@ -199,7 +199,7 @@ status_t rsa_modexp_consttime_4096_start(const rsa_4096_int_t *base,
  *
  * @param base Exponentiation base.
  * @param exp_p First CRT component of exponent to raise the base to.
- * @param exp_q Seocnd CRT component of exponent to raise the base to.
+ * @param exp_q Second CRT component of exponent to raise the base to.
  * @param crt_coeff CRT coefficient for exponentiation (inverse of q mod p).
  * @param modulus_p First cofactor of modulus for exponentiation.
  * @param modulus_q Second cofactor of modulus for exponentiation.
