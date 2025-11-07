@@ -290,7 +290,7 @@ jobs:
   verilator_earlgrey:
     name: Verilated Earl Grey
     runs-on:
-      group: zerorisc-none
+      group: zerorisc-large
     needs: quick_lint
     if: ${{ github.event_name != 'merge_group' }}
     timeout-minutes: 240
@@ -350,7 +350,7 @@ jobs:
   sw_build_test:
     name: Build and test software
     runs-on:
-      group: zerorisc-none
+      group: zerorisc-large
     timeout-minutes: 120
     needs: quick_lint
     if: ${{ github.event_name != 'merge_group' }}
