@@ -1,4 +1,5 @@
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright zeroRISC Inc.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -223,7 +224,7 @@ cc_library(
     hdrs = ["lc_ctrl_transition_impl.h"],
     target_compatible_with = [PAVONA_CPU],
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/base:bitfield",
         "//sw/device/lib/base:memory",
         "//sw/device/lib/base:mmio",
@@ -237,7 +238,10 @@ cc_library(
 pavona_test(
     name = "lc_ctrl_transition_test",
     srcs = ["lc_ctrl_transition_test.c"],
-    exec_env = {"//hw/top_egret:sim_dv": None},
+    exec_env = {
+        "//hw/top_dragonfly:sim_dv": None,
+        "//hw/top_egret:sim_dv": None,
+    },
     deps = [
         ":lc_ctrl_transition_impl",
         "//sw/device/lib/testing/test_framework:ottf_main",
@@ -379,7 +383,10 @@ pavona_test(
 pavona_test(
     name = "clkmgr_external_clk_src_for_lc_test",
     srcs = ["clkmgr_external_clk_src_for_lc_test.c"],
-    exec_env = {"//hw/top_egret:sim_dv": None},
+    exec_env = {
+        "//hw/top_dragonfly:sim_dv": None,
+        "//hw/top_egret:sim_dv": None,
+    },
     deps = [
         ":lc_ctrl_transition_impl",
         "//sw/device/lib/testing/test_framework:ottf_main",

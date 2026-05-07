@@ -690,15 +690,14 @@
     //   reseed: 1
     // }
     // End of TODO(Pavona #43)
-    // TODO(Pavona #43): Needs Dragonfly execution environment
-    // {
+    {
       // Set higher reseed value to reach all kmac_data to lc_ctrl toggle coverage.
-    //   name: chip_sw_lc_ctrl_transition
-    //   uvm_test_seq: chip_sw_lc_ctrl_transition_vseq
-    //   sw_images: ["//sw/device/tests/sim_dv:lc_ctrl_transition_test:6:new_rules"]
-    //   en_run_modes: ["sw_test_mode_test_rom"]
-    //   reseed: 15
-    // }
+      name: chip_sw_lc_ctrl_transition
+      uvm_test_seq: chip_sw_lc_ctrl_transition_vseq
+      sw_images: ["//sw/device/tests/sim_dv:lc_ctrl_transition_test:6:new_rules"]
+      en_run_modes: ["sw_test_mode_test_rom"]
+      reseed: 15
+    }
 
     {
       name: chip_sw_lc_ctrl_rma_to_scrap

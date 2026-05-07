@@ -1,10 +1,12 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright zeroRISC Inc.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 #include <assert.h>
 #include <stdbool.h>
 
+#include "hw/top/dt/lc_ctrl.h"
 #include "sw/device/lib/base/bitfield.h"
 #include "sw/device/lib/base/memory.h"
 #include "sw/device/lib/base/mmio.h"
@@ -12,8 +14,6 @@
 #include "sw/device/lib/runtime/log.h"
 #include "sw/device/lib/testing/lc_ctrl_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
-
-#include "hw/top_egret/sw/autogen/top_egret.h"
 
 #define LC_TOKEN_SIZE 16
 
@@ -65,7 +65,7 @@ bool execute_lc_ctrl_transition_test(bool use_ext_clk) {
   LOG_INFO("Start LC_CTRL transition test.");
 
   mmio_region_t lc_reg =
-      mmio_region_from_addr(TOP_EGRET_LC_CTRL_REGS_BASE_ADDR);
+      mmio_region_from_addr(dt_lc_ctrl_primary_reg_block(kDtLcCtrl));
   CHECK_DIF_OK(dif_lc_ctrl_init(lc_reg, &lc));
 
   LOG_INFO("Read and check LC state.");
