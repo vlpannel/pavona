@@ -734,38 +734,36 @@
       run_opts: ["+bypass_alert_ready_to_end_check=1"]
       reseed: 3
     }
-    // TODO(Pavona #43): Needs Dragonfly execution environment
-    // {
-    //   name: chip_sw_lc_walkthrough_dev
-    //   uvm_test_seq: chip_sw_lc_walkthrough_vseq
-    //   sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
-    //   en_run_modes: ["sw_test_mode_test_rom"]
-    //   run_opts: ["+flash_program_latency=5",
-    //              "+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStDev",
-                 // The test takes long time because it will transit to RMA state
-    //              "+sw_test_timeout_ns=200_000_000"]
-    //   run_timeout_mins: 240
-    // }
-    // {
-    //   name: chip_sw_lc_walkthrough_prod
-    //   uvm_test_seq: chip_sw_lc_walkthrough_vseq
-    //   sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
-    //   en_run_modes: ["sw_test_mode_test_rom"]
-    //   run_opts: ["+flash_program_latency=5",
-    //              "+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStProd",
-                 // The test takes long time because it will transit to RMA state
-    //              "+sw_test_timeout_ns=200_000_000"]
-    //   run_timeout_mins: 240
-    // }
-    // {
-    //   name: chip_sw_lc_walkthrough_prodend
-    //   uvm_test_seq: chip_sw_lc_walkthrough_vseq
-    //   sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
-    //   en_run_modes: ["sw_test_mode_test_rom"]
-    //   run_opts: ["+flash_program_latency=5",
-    //              "+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStProdEnd"]
-    // }
-    // End of TODO(Pavona #43)
+    {
+      name: chip_sw_lc_walkthrough_dev
+      uvm_test_seq: chip_sw_lc_walkthrough_vseq
+      sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
+      en_run_modes: ["sw_test_mode_test_rom"]
+      run_opts: ["+flash_program_latency=5",
+                 "+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStDev",
+              // The test takes long time because it will transit to RMA state
+                 "+sw_test_timeout_ns=200_000_000"]
+      run_timeout_mins: 240
+    }
+    {
+      name: chip_sw_lc_walkthrough_prod
+      uvm_test_seq: chip_sw_lc_walkthrough_vseq
+      sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
+      en_run_modes: ["sw_test_mode_test_rom"]
+      run_opts: ["+flash_program_latency=5",
+                 "+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStProd",
+              // The test takes long time because it will transit to RMA state
+                 "+sw_test_timeout_ns=200_000_000"]
+      run_timeout_mins: 240
+    }
+    {
+      name: chip_sw_lc_walkthrough_prodend
+      uvm_test_seq: chip_sw_lc_walkthrough_vseq
+      sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
+      en_run_modes: ["sw_test_mode_test_rom"]
+      run_opts: ["+flash_program_latency=5",
+                 "+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStProdEnd"]
+    }
     {
       name: chip_sw_lc_ctrl_volatile_raw_unlock
       uvm_test_seq: chip_sw_lc_volatile_raw_unlock_vseq
@@ -784,26 +782,24 @@
         "+chip_clock_source=ChipClockSourceExternal48Mhz"]
       run_timeout_mins: 120
     }
-    // TODO(Pavona #43): Needs Dragonfly execution environment
-    // {
-    //   name: chip_sw_lc_walkthrough_rma
-    //   uvm_test_seq: chip_sw_lc_walkthrough_vseq
-    //   sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
-    //   en_run_modes: ["sw_test_mode_test_rom"]
-    //   run_opts: ["+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStRma",
-    //              "+flash_program_latency=5",
-                 // The test takes long time because it will transit to RMA state
-    //              "+sw_test_timeout_ns=200_000_000"]
-    //   run_timeout_mins: 240
-    // }
-    // {
-    //   name: chip_sw_lc_walkthrough_testunlocks
-    //   uvm_test_seq: chip_sw_lc_walkthrough_testunlocks_vseq
-    //   sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_testunlocks_test:6:new_rules"]
-    //   en_run_modes: ["sw_test_mode_test_rom"]
-    //   run_opts: ["+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStTestUnlock7"]
-    // }
-    // End of TODO(Pavona #43)
+    {
+      name: chip_sw_lc_walkthrough_rma
+      uvm_test_seq: chip_sw_lc_walkthrough_vseq
+      sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_test:6:new_rules"]
+      en_run_modes: ["sw_test_mode_test_rom"]
+      run_opts: ["+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStRma",
+                 "+flash_program_latency=5",
+              // The test takes long time because it will transit to RMA state
+                 "+sw_test_timeout_ns=200_000_000"]
+      run_timeout_mins: 240
+    }
+    {
+      name: chip_sw_lc_walkthrough_testunlocks
+      uvm_test_seq: chip_sw_lc_walkthrough_testunlocks_vseq
+      sw_images: ["//sw/device/tests/sim_dv:lc_walkthrough_testunlocks_test:6:new_rules"]
+      en_run_modes: ["sw_test_mode_test_rom"]
+      run_opts: ["+use_otp_image=OtpTypeLcStRaw", "+dest_dec_state=DecLcStTestUnlock7"]
+    }
     {
       name: chip_sw_rstmgr_sw_req
       uvm_test_seq: chip_sw_base_vseq
