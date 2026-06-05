@@ -60,9 +60,6 @@ static uint32_t repeat_byte_to_u32(uint8_t byte) {
 
 void *OT_PREFIX_IF_NOT_RV32(memcpy)(void *restrict dest,
                                     const void *restrict src, size_t len) {
-  if (dest == NULL || src == NULL) {
-    return dest;
-  }
   unsigned char *dest8 = (unsigned char *)dest;
   const unsigned char *src8 = (const unsigned char *)src;
   size_t body_offset, tail_offset;

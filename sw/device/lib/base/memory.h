@@ -188,6 +188,7 @@ inline void write_64(uint64_t value, void *ptr) {
  * @param len the number of bytes to copy.
  * @return the value of `dest`.
  */
+OT_NONNULL
 void *OT_PREFIX_IF_NOT_RV32(memcpy)(void *OT_RESTRICT dest,
                                     const void *OT_RESTRICT src, size_t len);
 
@@ -204,6 +205,7 @@ void *OT_PREFIX_IF_NOT_RV32(memcpy)(void *OT_RESTRICT dest,
  * @param len the number of bytes to write.
  * @return the value of `dest`.
  */
+OT_NONNULL
 void *OT_PREFIX_IF_NOT_RV32(memset)(void *dest, int value, size_t len);
 
 /**
@@ -222,6 +224,7 @@ void *OT_PREFIX_IF_NOT_RV32(memset)(void *dest, int value, size_t len);
  * contingencies of `lhs == rhs`, `lhs > rhs`, and `lhs < rhs` (as buffers, not
  * pointers), respectively.
  */
+OT_NONNULL
 int OT_PREFIX_IF_NOT_RV32(memcmp)(const void *lhs, const void *rhs, size_t len);
 
 /**
@@ -241,6 +244,7 @@ int OT_PREFIX_IF_NOT_RV32(memcmp)(const void *lhs, const void *rhs, size_t len);
  * contingencies of `lhs == rhs`, `lhs > rhs`, and `lhs < rhs` (as buffers, not
  * pointers), respectively.
  */
+OT_NONNULL
 int memrcmp(const void *lhs, const void *rhs, size_t len);
 
 /**
@@ -260,6 +264,7 @@ int memrcmp(const void *lhs, const void *rhs, size_t len);
  * @param len the length of the region, in bytes.
  * @return a pointer to the found value, or NULL.
  */
+OT_NONNULL
 void *OT_PREFIX_IF_NOT_RV32(memchr)(const void *ptr, int value, size_t len);
 
 /**
@@ -273,6 +278,7 @@ void *OT_PREFIX_IF_NOT_RV32(memchr)(const void *ptr, int value, size_t len);
  * @param len the length of the region, in bytes.
  * @return a pointer to the found value, or NULL.
  */
+OT_NONNULL
 void *OT_PREFIX_IF_NOT_RV32(memrchr)(const void *ptr, int value, size_t len);
 
 #ifdef __cplusplus

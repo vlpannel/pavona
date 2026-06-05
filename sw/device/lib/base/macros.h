@@ -448,6 +448,12 @@ extern "C++" {
 #define OT_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 
 /**
+ * Marks all pointer parameters as non-null so the compiler warns (`-Wnonnull`)
+ * when a NULL/0 argument is passed.
+ */
+#define OT_NONNULL __attribute__((nonnull))
+
+/**
  * Attribute for weak functions that can be overridden, e.g., ISRs.
  */
 #define OT_WEAK __attribute__((weak))
