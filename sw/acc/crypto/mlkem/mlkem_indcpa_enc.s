@@ -436,7 +436,8 @@ pkpv:
 epp:
 .zero 2048
 
-/* Shared buffer for sp and ep (512 bytes each). */
+/* Shared buffer for sp and ep (k*512 bytes, max K=4). */
+.balign 32
 sp:
 ep:
-.zero 512
+.zero 2048
