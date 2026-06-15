@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright zeroRISC Inc.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -135,6 +136,9 @@ class acc_common_vseq extends acc_base_vseq;
     if (if_proxy.sec_cm_type == SecCmPrimCount &&
         !uvm_re_match("*.u_tlul_adapter_sram_*", if_proxy.path)) begin
       fatal_cause = ral.fatal_alert_cause.bus_intg_violation;
+    end else if (if_proxy.sec_cm_type == SecCmPrimCount &&
+        !uvm_re_match("*.gen_pqc_wsr*", if_proxy.path)) begin
+      fatal_cause = ral.fatal_alert_cause.kmac_fatal_error;
     end else begin
       fatal_cause = ral.fatal_alert_cause.bad_internal_state;
     end
