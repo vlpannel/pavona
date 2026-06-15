@@ -304,22 +304,22 @@ package kmac_pkg;
     SelSw             = 6'b110101
   } app_mux_sel_e ;
 
-  // Encoding generated with:
-  // $ ./util/design/sparse-fsm-encode.py -d 3 -m 17 -n 10 \
-  //     -s 2454278799 --language=sv
+  // Encoding generated at commit 285e653a0b using Python 3.12.3 with:
+  // $ ./util/design/sparse-fsm-encode.py --language=sv \
+  //     --seed 2454278799 --distance 3 --states 18 --bits 10
   //
   // Hamming distance histogram:
   //
   //  0: --
   //  1: --
   //  2: --
-  //  3: |||||||| (12.50%)
-  //  4: |||||||||||||||||||| (30.88%)
-  //  5: |||||||||| (15.44%)
-  //  6: ||||||||||||||| (23.53%)
-  //  7: ||||| (8.82%)
-  //  8: |||| (7.35%)
-  //  9:  (1.47%)
+  //  3: ||||||||| (13.73%)
+  //  4: |||||||||||||||||||| (28.76%)
+  //  5: ||||||||||| (16.34%)
+  //  6: ||||||||||||||| (21.57%)
+  //  7: ||||||| (11.11%)
+  //  8: ||||| (7.19%)
+  //  9:  (1.31%)
   // 10: --
   //
   // Minimum Hamming distance: 3
@@ -348,35 +348,36 @@ package kmac_pkg;
     // the kmac_mode, sha3_mode, keccak strength.
     StAppCfg = 10'b1010101101,
 
-    StAppDynamicCfg = 10'b0000111100,
+    StAppDynamicCfg = 10'b1110001011,
 
-    StAppMsg = 10'b1110001011,
+    StAppMsg = 10'b1010011000,
 
     // In StKeyOutLen, this module pushes encoded outlen to the MSG_FIFO.
     // Assume the length is 256 bit, the data will be 48'h 02_0100
-    StAppOutLen  = 10'b1010011000,
-    StAppProcess = 10'b1110110010,
-    StAppManualRun = 10'b0001101001,
-    StAppWait    = 10'b1001010000,
-    StAppShiftDigest = 10'b0110100111,
+    StAppOutLen  = 10'b1110110010,
+    StAppProcess = 10'b1001010000,
+    StAppManualRun = 10'b0010111011,
+    StAppWait    = 10'b0111011111,
+    StAppEagerWait = 10'b1110010111,
+    StAppShiftDigest = 10'b0110001100,
 
     // SW Controlled
     // If start request comes from SW first, until the operation ends, all
     // requests from KeyMgr will be discarded.
-    StSw = 10'b0010111011,
+    StSw = 10'b1011100000,
 
     // Error KeyNotValid
     // When KeyMgr operates, the secret key is not ready yet.
-    StKeyMgrErrKeyNotValid = 10'b0111011111,
+    StKeyMgrErrKeyNotValid = 10'b0010100100,
 
-    StError = 10'b1110010111,
-    StErrorAwaitSw = 10'b0110001100,
-    StErrorAwaitApp = 10'b1011100000,
-    StErrorWaitAbsorbed = 10'b0010100100,
-    StErrorServiceRejected = 10'b1101000111,
+    StError = 10'b1101000111,
+    StErrorAwaitSw = 10'b0101110110,
+    StErrorAwaitApp = 10'b0000111100,
+    StErrorWaitAbsorbed = 10'b0001101001,
+    StErrorServiceRejected = 10'b0110100111,
 
     // This state is used for terminal errors
-    StTerminalError = 10'b0101110110
+    StTerminalError = 10'b0001111010
   } st_e;
 
   // MsgWidth : 64

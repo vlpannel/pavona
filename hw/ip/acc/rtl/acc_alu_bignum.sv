@@ -1212,6 +1212,8 @@ generate
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
       kmac_app_cfg_sent <= 1'b0;
+    end else if (~kmac_app_req_o.hold) begin // Once the message is complete drop flag
+      kmac_app_cfg_sent <= 1'b0;
     end else if (kmac_cfg_active_q) begin
       if (kmac_app_rsp_i.ready) begin
         kmac_app_cfg_sent <= 1'b1;

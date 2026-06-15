@@ -568,6 +568,22 @@ module kmac_app
           end
         end else begin
           st_d = StAppWait;
+          if ((AppCfg[app_id].Mode == AppConfigDynamic) && (app_i[app_id].hold == 1'b0)) begin
+            st_d = StAppEagerWait;
+          end
+        end
+      end
+
+      StAppEagerWait: begin
+        if (prim_mubi_pkg::mubi4_test_true_strict(absorbed_i) ||
+            prim_mubi_pkg::mubi4_test_true_strict(squeezing_i))
+        begin
+          digest_valid = 1'b 1;
+          st_d = StIdle;
+          cmd_o = CmdDone;
+          clr_appid = 1'b 1;
+        end else begin
+          st_d = StAppEagerWait;
         end
       end
 
