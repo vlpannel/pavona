@@ -90,6 +90,7 @@ $(tops_gen): %_gen:
 	 for xbar_cfg in $$(ls $$xbar_configs); do \
 	   ${PRJ_DIR}/util/tlgen.py --libname $* -t "$$xbar_configs"/"$$xbar_cfg" -o ${PRJ_DIR}/hw/$*/ip/$${xbar_cfg%".gen.hjson"}; \
 	 done)
+	${PRJ_DIR}/util/gen_top_sv.py -t $(top_complete_hjson) -s $(top_complete_seed_hjson)
 	${PRJ_DIR}/util/gen_top_docs.py -t $(top_complete_hjson)
 	${PRJ_DIR}/util/gen_top_sw.py -t $(top_complete_hjson)
 
