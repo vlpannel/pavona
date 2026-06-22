@@ -14,6 +14,9 @@ import importlib.resources
 from .xbar import Xbar
 
 
+REPO_TOP = Path(__file__).parents[2].resolve()
+
+
 def generate_tb(xbar: Xbar,
                 dv_path: Path,
                 library_name: str = "ip") -> None:
@@ -47,6 +50,8 @@ def generate_tb(xbar: Xbar,
 
         with dv_filepath.open(mode='w', encoding='UTF-8') as fout:
             try:
-                fout.write(tpl.render(xbar=xbar, library_name=library_name))
+                fout.write(
+                    tpl.render(xbar=xbar, library_name=library_name,
+                               dv_filepath=dv_filepath.relative_to(REPO_TOP)))
             except:  # noqa: E722 for general exception handling
                 log.error(exceptions.text_error_template().render())
