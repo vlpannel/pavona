@@ -91,6 +91,7 @@ $(tops_gen): %_gen:
 	   ${PRJ_DIR}/util/tlgen.py --libname $* -t "$$xbar_configs"/"$$xbar_cfg" -o ${PRJ_DIR}/hw/$*/ip/$${xbar_cfg%".gen.hjson"}; \
 	 done)
 	${PRJ_DIR}/util/gen_top_docs.py -t $(top_complete_hjson)
+	${PRJ_DIR}/util/gen_top_sw.py -t $(top_complete_hjson)
 
 # This runs cmdgen on all md files of the repo using xargs for parallelism
 cmdgen: top
