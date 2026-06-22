@@ -80,6 +80,10 @@ top_chip_hjson = $(PRJ_DIR)/hw/$(TOPS)/$(dir_hjson)/$(TOPS).hjson
 top: $(tops_gen)
 $(tops_gen): %_gen:
 	${PRJ_DIR}/util/topgen.py -t $(top_hjson) -s $(top_seed_hjson) -o ${PRJ_DIR}/hw/$*/ ${toolflags}
+	(for ipgen in $$(${PRJ_DIR}/util/top_cm_and_blocks.py -t $(top_complete_hjson) --filter ipgen get_blocks); do \
+	   ${PRJ_DIR}/util/gen_top_ipconfigs.py --seedcfg $(top_complete_seed_hjson) --ips $$ipgen --outdir ${PRJ_DIR}/hw/$*/ip_autogen/"$$ipgen"/data -t $(top_complete_hjson); \
+	   ${PRJ_DIR}/util/ipgen.py generate -C ${PRJ_DIR}/hw/ip_templates/"$$ipgen" --force --outdir ${PRJ_DIR}/hw/$*/ip_autogen/"$$ipgen" --config-file ${PRJ_DIR}/hw/$*/ip_autogen/"$$ipgen"/data/$*_"$$ipgen".ipconfig.hjson; \
+	 done)
 	(xbar_configs=$$(mktemp -d); \
 	 ${PRJ_DIR}/util/gen_top_ipconfigs.py --ips xbar_main xbar_peri xbar_mbx xbar_dbg --xbars -s $(top_complete_seed_hjson) --outdir $$xbar_configs -t $(top_complete_hjson); \
 	 for xbar_cfg in $$(ls $$xbar_configs); do \

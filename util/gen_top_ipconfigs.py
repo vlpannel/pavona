@@ -282,7 +282,7 @@ def _get_rstmgr_params(top: ConfigT) -> ParamsT:
         "leaf_rsts": leaf_rsts,
         "rst_ni": rst_ni['rst_ni']['name'],
         "export_rsts": top["exported_rsts"],
-        "with_alert_handler": with_alert_handler,
+        "with_alert_dump": with_alert_handler,
     })
     return ipgen_params
 
