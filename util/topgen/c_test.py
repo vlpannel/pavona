@@ -111,7 +111,7 @@ class TopGenCTest(TopGenC):
         # There may be multiple PLICs, for example, in one address space.
         # Or devices with core # interfaces in address spaces that are different
         # from the CPU's and PLIC's.
-        rv_plic_addr_spaces = rv_plic['base_addrs'][None]
+        rv_plic_addr_spaces = rv_plic['base_addrs'].get(None) or rv_plic["base_addrs"].get("null")
         if addr_space not in rv_plic_addr_spaces:
             return irq_peripherals
 
@@ -200,7 +200,7 @@ class TopGenCTest(TopGenC):
             status_default_mask = 0
             for irq in self.top["interrupt"]:
                 if irq["module_name"] == inst_name:
-                    if irq["intr_type"] == IntrType.Status:
+                    if irq["intr_type"] == IntrType.Status or irq["intr_type"] == "IntrType.Status":
                         setbit = (((1 << irq["width"]) - 1) << n)
                         status_type_mask |= setbit
                         if irq["default_val"] is True:
@@ -227,7 +227,8 @@ class TopGenCTest(TopGenC):
         """
         alert_peripherals = []
         # TODO: Model alert domains with explicit connectivity
-        alert_handler_addr_spaces = alert_handler['base_addrs'][None]
+        alert_handler_addr_spaces = (alert_handler['base_addrs'].get(None)
+                                     or alert_handler["base_addrs"].get("null"))
         if addr_space not in alert_handler_addr_spaces:
             return alert_peripherals
         all_device_regions = self.all_device_regions()

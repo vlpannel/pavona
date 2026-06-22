@@ -16,6 +16,7 @@ from reggen.lib import check_int
 from reggen.multi_register import MultiRegister
 from reggen.reg_base import RegBase
 from reggen.register import Register
+from reggen.memory import Memory
 
 
 def escape_name(name: str) -> str:
@@ -120,11 +121,21 @@ def gen_rtl(block: IpBlock, outdir: str) -> int:
     # (writing to <block>_reg_top.sv). In any other case, we also need the
     # interface name, giving <block>_<ifname>_reg_top.
     lblock = block.name.lower()
-    for if_name, rb in block.reg_blocks.items():
+    for if_name, rb in list(block.reg_blocks.items()) + list(block.memories.items()):
         if if_name is None:
             mod_base = lblock
         else:
             mod_base = lblock + '_' + if_name.lower()
+
+        if isinstance(rb, Memory):
+            setattr(rb, "all_regs", [])
+            setattr(rb, "flat_regs", [])
+            setattr(rb, "has_data_intg_passthru", False)
+            setattr(rb, "async_if", False)
+            setattr(rb, "clocks", {})
+            setattr(rb, "has_internal_shadowed_reg", lambda: False)
+            setattr(rb, "get_n_bits", lambda bits: False)
+            setattr(rb, "get_addr_width", lambda: 0)
 
         mod_name = mod_base + alias_impl + '_reg_top'
         reg_top_path = os.path.join(outdir, mod_name + '.sv')

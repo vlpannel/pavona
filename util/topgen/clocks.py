@@ -265,6 +265,8 @@ class Clocks:
             assert isinstance(raw_grp, dict)
             grp = Group(raw_grp, f'clocks.groups[{idx}]')
             self.groups[grp.name] = grp
+            for group_clk, gc_src_name in raw_grp.get("clocks", dict()).items():
+                grp.add_clock(group_clk, self.all_srcs[gc_src_name])
 
     def _asdict(self) -> Dict[str, object]:
         return {
