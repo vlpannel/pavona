@@ -1,5 +1,5 @@
-# Copyright zeroRISC Inc.
 # Copyright lowRISC contributors (OpenTitan project).
+# Copyright zeroRISC Inc.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -38,7 +38,7 @@ Top Hjsons should also have the following keys (some being optional):
     make_usage_table(outfile, required=top_required, optional=top_optional)
 
     outfile.write("\nModule Hjsons (referred to by the \"complete config\" Hjson topgen "
-                  "creates) has the following keys (some being optional):")
+                  "creates) has the following keys (some being optional):\n")
     make_usage_table(outfile, required=module_required, optional=module_optional)
 
     outfile.write("\nThe \"complete config\" Hjson adds the following keys:\n")
