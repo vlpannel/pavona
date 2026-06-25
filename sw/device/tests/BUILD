@@ -2965,9 +2965,12 @@ pavona_test(
 pavona_test(
     name = "lc_ctrl_otp_hw_cfg0_test",
     srcs = ["lc_ctrl_otp_hw_cfg0_test.c"],
-    exec_env = EGRET_TEST_ENVS,
+    exec_env = dicts.add(
+        EGRET_TEST_ENVS,
+        DRAGONFLY_TEST_ENVS,
+    ),
     deps = [
-        "//hw/top_egret/sw/autogen:top_egret",
+        "//hw/top/dt",
         "//sw/device/lib/base:bitfield",
         "//sw/device/lib/base:memory",
         "//sw/device/lib/base:mmio",

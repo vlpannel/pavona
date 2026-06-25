@@ -607,13 +607,12 @@
       sw_images: ["//sw/device/tests:kmac_entropy_test:6:new_rules"]
       en_run_modes: ["sw_test_mode_test_rom"]
     }
-    // TODO(Pavona #44): Needs sw_image Bazel target
-    // {
-    //   name: chip_sw_lc_ctrl_otp_hw_cfg
-    //   uvm_test_seq: chip_sw_base_vseq
-    //   sw_images: ["//sw/device/tests:lc_ctrl_otp_hw_cfg_test:6:new_rules"]
-    //   en_run_modes: ["sw_test_mode_test_rom"]
-    // }
+    {
+      name: chip_sw_lc_ctrl_otp_hw_cfg
+      uvm_test_seq: chip_sw_base_vseq
+      sw_images: ["//sw/device/tests:lc_ctrl_otp_hw_cfg0_test:6:new_rules"]
+      en_run_modes: ["sw_test_mode_test_rom"]
+    }
     // TODO(Pavona #43): Needs Dragonfly execution environment
     // {
     //   name: chip_sw_otp_ctrl_lc_signals_test_unlocked0

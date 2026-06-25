@@ -1,4 +1,5 @@
 // Copyright lowRISC contributors (OpenTitan project).
+// Copyright zeroRISC Inc.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -14,8 +15,6 @@
 #include "sw/device/lib/testing/otp_ctrl_testutils.h"
 #include "sw/device/lib/testing/test_framework/check.h"
 #include "sw/device/lib/testing/test_framework/ottf_main.h"
-
-#include "hw/top_egret/sw/autogen/top_egret.h"
 
 static dif_otp_ctrl_t otp;
 static dif_lc_ctrl_t lc;
@@ -39,12 +38,8 @@ static void otp_ctrl_dai_read_32(const dif_otp_ctrl_t *otp,
  */
 // TODO: needs to support other recipients besides LC_CTRL.
 bool test_main(void) {
-  CHECK_DIF_OK(dif_otp_ctrl_init(
-      mmio_region_from_addr(TOP_EGRET_OTP_CTRL_CORE_BASE_ADDR), &otp));
-
-  mmio_region_t lc_reg =
-      mmio_region_from_addr(TOP_EGRET_LC_CTRL_REGS_BASE_ADDR);
-  CHECK_DIF_OK(dif_lc_ctrl_init(lc_reg, &lc));
+  CHECK_DIF_OK(dif_otp_ctrl_init_from_dt(kDtOtpCtrl, &otp));
+  CHECK_DIF_OK(dif_lc_ctrl_init_from_dt(kDtLcCtrl, &lc));
 
   dif_otp_ctrl_config_t config = {
       .check_timeout = 100000,
