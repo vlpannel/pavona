@@ -200,7 +200,7 @@ class TopGenCTest(TopGenC):
             status_default_mask = 0
             for irq in self.top['interrupt']:
                 if irq['module_name'] == inst_name:
-                    if irq['intr_type'] == IntrType.Status or irq['intr_type'] == 'IntrType.Status':
+                    if IntrType(irq['intr_type']) == IntrType.Status:
                         setbit = (((1 << irq['width']) - 1) << n)
                         status_type_mask |= setbit
                         if irq['default_val'] is True:

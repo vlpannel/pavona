@@ -18370,7 +18370,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 tx_watermark interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: true
       incoming: false
       plic: rv_plic
@@ -18382,7 +18382,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 rx_watermark interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18394,7 +18394,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 tx_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18406,7 +18406,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 rx_overflow interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18418,7 +18418,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 rx_frame_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18430,7 +18430,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 rx_break_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18442,7 +18442,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 rx_timeout interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18454,7 +18454,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 rx_parity_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18466,7 +18466,7 @@
       type: interrupt
       module_name: uart0
       desc: uart0 tx_empty interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: true
       incoming: false
       plic: rv_plic
@@ -18478,7 +18478,7 @@
       type: interrupt
       module_name: gpio
       desc: gpio gpio interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18490,7 +18490,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device upload_cmdfifo_not_empty interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18502,7 +18502,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device upload_payload_not_empty interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18514,7 +18514,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device upload_payload_overflow interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18526,7 +18526,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device readbuf_watermark interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18538,7 +18538,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device readbuf_flip interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18550,7 +18550,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device tpm_header_not_empty interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18562,7 +18562,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device tpm_rdfifo_cmd_end interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18574,7 +18574,7 @@
       type: interrupt
       module_name: spi_device
       desc: spi_device tpm_rdfifo_drop interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18586,7 +18586,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 fmt_threshold interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18598,7 +18598,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 rx_threshold interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18610,7 +18610,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 acq_threshold interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18622,7 +18622,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 rx_overflow interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18634,7 +18634,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 controller_halt interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18646,7 +18646,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 scl_interference interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18658,7 +18658,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 sda_interference interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18670,7 +18670,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 stretch_timeout interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18682,7 +18682,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 sda_unstable interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18694,7 +18694,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 cmd_complete interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18706,7 +18706,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 tx_stretch interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18718,7 +18718,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 tx_threshold interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18730,7 +18730,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 acq_stretch interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18742,7 +18742,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 unexp_stop interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18754,7 +18754,7 @@
       type: interrupt
       module_name: i2c0
       desc: i2c0 host_timeout interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18766,7 +18766,7 @@
       type: interrupt
       module_name: rv_timer
       desc: rv_timer timer_expired_hart0_timer0 interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18778,7 +18778,7 @@
       type: interrupt
       module_name: otp_ctrl
       desc: otp_ctrl otp_operation_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18790,7 +18790,7 @@
       type: interrupt
       module_name: otp_ctrl
       desc: otp_ctrl otp_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18802,7 +18802,7 @@
       type: interrupt
       module_name: alert_handler
       desc: alert_handler classa interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18814,7 +18814,7 @@
       type: interrupt
       module_name: alert_handler
       desc: alert_handler classb interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18826,7 +18826,7 @@
       type: interrupt
       module_name: alert_handler
       desc: alert_handler classc interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18838,7 +18838,7 @@
       type: interrupt
       module_name: alert_handler
       desc: alert_handler classd interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18850,7 +18850,7 @@
       type: interrupt
       module_name: spi_host0
       desc: spi_host0 error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18862,7 +18862,7 @@
       type: interrupt
       module_name: spi_host0
       desc: spi_host0 spi_event interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18874,7 +18874,7 @@
       type: interrupt
       module_name: pwrmgr_aon
       desc: pwrmgr_aon wakeup interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18886,7 +18886,7 @@
       type: interrupt
       module_name: aon_timer_aon
       desc: aon_timer_aon wkup_timer_expired interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18898,7 +18898,7 @@
       type: interrupt
       module_name: aon_timer_aon
       desc: aon_timer_aon wdog_timer_bark interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18910,7 +18910,7 @@
       type: interrupt
       module_name: acc
       desc: acc done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18922,7 +18922,7 @@
       type: interrupt
       module_name: hmac
       desc: hmac hmac_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18934,7 +18934,7 @@
       type: interrupt
       module_name: hmac
       desc: hmac fifo_empty interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18946,7 +18946,7 @@
       type: interrupt
       module_name: hmac
       desc: hmac hmac_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18958,7 +18958,7 @@
       type: interrupt
       module_name: kmac
       desc: kmac kmac_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18970,7 +18970,7 @@
       type: interrupt
       module_name: kmac
       desc: kmac fifo_empty interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18982,7 +18982,7 @@
       type: interrupt
       module_name: kmac
       desc: kmac kmac_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -18994,7 +18994,7 @@
       type: interrupt
       module_name: keymgr_dpe
       desc: keymgr_dpe op_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19006,7 +19006,7 @@
       type: interrupt
       module_name: csrng
       desc: csrng cs_cmd_req_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19018,7 +19018,7 @@
       type: interrupt
       module_name: csrng
       desc: csrng cs_entropy_req interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19030,7 +19030,7 @@
       type: interrupt
       module_name: csrng
       desc: csrng cs_hw_inst_exc interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19042,7 +19042,7 @@
       type: interrupt
       module_name: csrng
       desc: csrng cs_fatal_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19054,7 +19054,7 @@
       type: interrupt
       module_name: entropy_src
       desc: entropy_src es_entropy_valid interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19066,7 +19066,7 @@
       type: interrupt
       module_name: entropy_src
       desc: entropy_src es_health_test_failed interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19078,7 +19078,7 @@
       type: interrupt
       module_name: entropy_src
       desc: entropy_src es_observe_fifo_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19090,7 +19090,7 @@
       type: interrupt
       module_name: entropy_src
       desc: entropy_src es_fatal_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19102,7 +19102,7 @@
       type: interrupt
       module_name: edn0
       desc: edn0 edn_cmd_req_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19114,7 +19114,7 @@
       type: interrupt
       module_name: edn0
       desc: edn0 edn_fatal_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19126,7 +19126,7 @@
       type: interrupt
       module_name: edn1
       desc: edn1 edn_cmd_req_done interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19138,7 +19138,7 @@
       type: interrupt
       module_name: edn1
       desc: edn1 edn_fatal_err interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19150,7 +19150,7 @@
       type: interrupt
       module_name: dma
       desc: dma dma_done interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19162,7 +19162,7 @@
       type: interrupt
       module_name: dma
       desc: dma dma_chunk_done interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19174,7 +19174,7 @@
       type: interrupt
       module_name: dma
       desc: dma dma_error interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19186,7 +19186,7 @@
       type: interrupt
       module_name: mbx0
       desc: mbx0 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19198,7 +19198,7 @@
       type: interrupt
       module_name: mbx0
       desc: mbx0 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19210,7 +19210,7 @@
       type: interrupt
       module_name: mbx0
       desc: mbx0 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19222,7 +19222,7 @@
       type: interrupt
       module_name: mbx1
       desc: mbx1 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19234,7 +19234,7 @@
       type: interrupt
       module_name: mbx1
       desc: mbx1 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19246,7 +19246,7 @@
       type: interrupt
       module_name: mbx1
       desc: mbx1 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19258,7 +19258,7 @@
       type: interrupt
       module_name: mbx2
       desc: mbx2 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19270,7 +19270,7 @@
       type: interrupt
       module_name: mbx2
       desc: mbx2 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19282,7 +19282,7 @@
       type: interrupt
       module_name: mbx2
       desc: mbx2 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19294,7 +19294,7 @@
       type: interrupt
       module_name: mbx3
       desc: mbx3 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19306,7 +19306,7 @@
       type: interrupt
       module_name: mbx3
       desc: mbx3 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19318,7 +19318,7 @@
       type: interrupt
       module_name: mbx3
       desc: mbx3 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19330,7 +19330,7 @@
       type: interrupt
       module_name: mbx4
       desc: mbx4 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19342,7 +19342,7 @@
       type: interrupt
       module_name: mbx4
       desc: mbx4 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19354,7 +19354,7 @@
       type: interrupt
       module_name: mbx4
       desc: mbx4 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19366,7 +19366,7 @@
       type: interrupt
       module_name: mbx5
       desc: mbx5 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19378,7 +19378,7 @@
       type: interrupt
       module_name: mbx5
       desc: mbx5 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19390,7 +19390,7 @@
       type: interrupt
       module_name: mbx5
       desc: mbx5 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19402,7 +19402,7 @@
       type: interrupt
       module_name: mbx6
       desc: mbx6 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19414,7 +19414,7 @@
       type: interrupt
       module_name: mbx6
       desc: mbx6 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19426,7 +19426,7 @@
       type: interrupt
       module_name: mbx6
       desc: mbx6 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19438,7 +19438,7 @@
       type: interrupt
       module_name: mbx_jtag
       desc: mbx_jtag mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19450,7 +19450,7 @@
       type: interrupt
       module_name: mbx_jtag
       desc: mbx_jtag mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19462,7 +19462,7 @@
       type: interrupt
       module_name: mbx_jtag
       desc: mbx_jtag mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19474,7 +19474,7 @@
       type: interrupt
       module_name: mbx_pcie0
       desc: mbx_pcie0 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19486,7 +19486,7 @@
       type: interrupt
       module_name: mbx_pcie0
       desc: mbx_pcie0 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19498,7 +19498,7 @@
       type: interrupt
       module_name: mbx_pcie0
       desc: mbx_pcie0 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19510,7 +19510,7 @@
       type: interrupt
       module_name: mbx_pcie1
       desc: mbx_pcie1 mbx_ready interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19522,7 +19522,7 @@
       type: interrupt
       module_name: mbx_pcie1
       desc: mbx_pcie1 mbx_abort interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19534,7 +19534,7 @@
       type: interrupt
       module_name: mbx_pcie1
       desc: mbx_pcie1 mbx_error interrupt
-      intr_type: IntrType.Event
+      intr_type: 1
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19546,7 +19546,7 @@
       type: interrupt
       module_name: racl_ctrl
       desc: racl_ctrl racl_error interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
@@ -19558,7 +19558,7 @@
       type: interrupt
       module_name: ac_range_check
       desc: ac_range_check deny_cnt_reached interrupt
-      intr_type: IntrType.Status
+      intr_type: 2
       default_val: false
       incoming: false
       plic: rv_plic
