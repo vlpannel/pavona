@@ -5,7 +5,6 @@
 r"""FuseSoc generator for UVM RAL package created with either regtool or
 topgen tools.
 """
-import os
 import shlex
 import subprocess
 import sys
@@ -51,7 +50,7 @@ def main():
     if ip_hjson:
         ral_spec = root_dir / ip_hjson
         cmd = util_path / "regtool.py"
-        args = [cmd, "-s", "-t", os.getcwd(), ral_spec]
+        args = [cmd, "-s", "-t", Path.cwd(), ral_spec]
         if alias_hjson:
             args += ["--alias", root_dir / alias_hjson]
     else:
@@ -60,7 +59,7 @@ def main():
         ral_spec = original_spec.parent / "autogen" / f"{top_name}.gen.hjson"
 
         cmd = util_path / "gen_top_ral.py"
-        args = [cmd, "-o", os.getcwd(), "-t", ral_spec]
+        args = [cmd, "-o", Path.cwd(), "-t", ral_spec]
         if alias_hjson:
             args += ["--alias-files"]
             for alias in alias_hjson:
