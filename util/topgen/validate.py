@@ -40,17 +40,6 @@ from basegen.validate import create_validator
 #     'pe': ["python enum", "Native Python type enum (generated)"]
 # }
 
-# Required/optional field in top seeds hjson
-top_seed_required = {
-    'name': ['s', 'Top name'],
-    'topgen_seed': ['d', "Seed for topgen generated random netlist constants"],
-}
-
-top_seed_optional = {
-    'otp_img_seed': ['d', "Seed for OTP image generation"],
-    'lc_ctrl_seed': ['d', "Seed for lc_ctrl generated random netlist constants"],
-}
-
 pinmux_required = {
     'enable_usb_wakeup': ['pb', 'Enable USB wakeup in pinmux'],
     'enable_strap_sampling':
@@ -414,6 +403,7 @@ inter_sig_added = {}
 
 
 TOPCFG_VALIDATOR = create_validator("urn:topgen:topcfg")
+SEEDCFG_VALIDATOR = create_validator("urn:topgen:seedcfg")
 
 
 # Supported PAD types.
@@ -1210,19 +1200,22 @@ def check_modules(top: ConfigT, prefix: str) -> int:
 
 def validate_seed_cfg(top: ConfigT, seed_cfg: ConfigT):
     """
-    Validates the seed config coming from am external file
+    Validates the seed config coming from an external file
     """
-    # Validate seed information is here. First determine the required keys depending on the
-    # top configuration
-    if find_module(top["module"], "otp_ctrl"):
-        top_seed_required["otp_img_seed"] = top_seed_optional["otp_img_seed"]
-    if find_module(top["module"], "lc_ctrl"):
-        top_seed_required["lc_ctrl_seed"] = top_seed_optional["lc_ctrl_seed"]
+    # First determine the required keys depending on the top configuration
+    if find_module(top["module"], "otp_ctrl") and "otp_img_seed" not in seed_cfg:
+        raise KeyError("presence of otp_ctrl requires OTP image seed")
+    if find_module(top["module"], "lc_ctrl") and "lc_ctrl_seed" not in seed_cfg:
+        raise KeyError("presence of lc_ctrl requires LC controller seed")
 
-    error = check_keys(seed_cfg, top_seed_required, top_seed_optional, [], "seed")
-    if error:
-        log.error("Seed HJSON has errors. Aborting")
-    return error
+    validation_errors = list(SEEDCFG_VALIDATOR.iter_errors(seed_cfg))
+    for err in validation_errors:
+        validation_path = err.absolute_path
+        validation_path.appendleft("seedcfg")
+        log.error(f"(validation error, {'.'.join(validation_path)})"
+                  f" {err.message}")
+
+    return int(len(validation_errors) > 0)
 
 
 def validate_top(top: ConfigT, ip_name_to_block: IpBlocksT,
