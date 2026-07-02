@@ -40,14 +40,6 @@ from basegen.validate import create_validator
 #     'pe': ["python enum", "Native Python type enum (generated)"]
 # }
 
-reset_connection_required = {
-    'name': ['s', 'name of the connecting reset'],
-    'domain': ['s', 'connected domain'],
-}
-
-reset_connection_optional = {}
-reset_connection_added = {}
-
 reset_requests_required = {}
 reset_requests_optional = {
     'int': [
@@ -709,16 +701,10 @@ def validate_reset(top: ConfigT,
             else:
                 top["reset_connections"][port]['domain'] = top["domain"][0]
 
-        if isinstance(reset, dict):
-            error += check_keys(reset, reset_connection_required,
-                                reset_connection_optional,
-                                reset_connection_added,
-                                'dict structure for reset connections')
-
-            if reset['domain'] not in top["domain"]:
-                error += 1
-                log.error(f"domain {reset['domain']} defined for reset "
-                          f"{reset['name']} is not a domain of {top['name']}")
+        if isinstance(reset, dict) and reset['domain'] not in top["domain"]:
+            error += 1
+            log.error(f"domain {reset['domain']} defined for reset "
+                      f"{reset['name']} is not a domain of {top['name']}")
 
     # Check if the reset connections are fully populated
     if len(top['reset_connections']) != len(reset_signals):
