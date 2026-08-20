@@ -68,7 +68,7 @@ The tool also may insert the optional keys with default value.
 and value is the top reset signal.
 - <a id="properties/clock_connections"></a>**`clock_connections`** *(object, required)*: list of clocks.
 - <a id="properties/domain"></a>**`domain`** *(array)*: Power domain for the crossbar.
-  - <a id="properties/domain/items"></a>**Items** *(string)*
+  - <a id="properties/domain/items"></a>**Items** *(['string', 'integer'])*
 - <a id="properties/connections"></a>**`connections`** *(object, required)*: List of edge. Key is host, entry in value list is device.
 - <a id="properties/nodes"></a>**`nodes`** *(array, required)*
   - <a id="properties/nodes/items"></a>**Items**: Refer to *[urn:tlgen:node](#n%3Atlgen%3Anode)*.
@@ -97,7 +97,17 @@ If not specified, it is assumed to be in main clock domain.
 - <a id="properties/inst_type"></a>**`inst_type`** *(string)*: Instance type.
 - <a id="properties/xbar"></a>**`xbar`** *(boolean)*: If true, the node is connected to another Xbar.
 - <a id="properties/addr_range"></a>**`addr_range`** *(array)*
+  - <a id="properties/addr_range/items"></a>**Items**: Refer to *[urn:tlgen:addrs](#n%3Atlgen%3Aaddrs)*.
 - <a id="properties/stub"></a>**`stub`** *(boolean)*: Real node or stub.  Stubs only occupy address ranges.
+
+### Address configurations
+
+*Device Node address configuration. It contains the base address and the size in bytes.*
+
+#### Properties
+
+- <a id="properties/base_addrs"></a>**`base_addrs`** *(object, required)*: Base addresses of the device. It is required for the device.
+- <a id="properties/size_byte"></a>**`size_byte`** *(integer, required)*: Memory space of the device. It is required for the device.
 
 <!-- END CMDGEN -->
 
