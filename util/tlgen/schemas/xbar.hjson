@@ -23,7 +23,7 @@
     domain: {
       type: "array",
       description: "Power domain for the crossbar"
-      items: { type: "string" }
+      items: { type: ["string", "integer"] }
     },
     connections: {
       type: "object",
